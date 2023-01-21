@@ -1,17 +1,23 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import "./fonts/Gelion Regular.woff";
+import "./fonts/Gelion Regular Italic.woff";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+import "./fonts/Gelion Medium.woff";
+import "./fonts/Gelion Medium.woff";
+
+import "./fonts/Gelion Light.woff";
+import "./fonts/Gelion Light Italic.woff";
+
+import "./fonts/Gelion Bold.woff";
+import "./fonts/Gelion Bold Italic.woff";
+
+import App from "./App";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
