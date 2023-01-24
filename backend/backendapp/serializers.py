@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-
-
 class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for the custom user model
     class Meta:
         model = get_user_model()
@@ -18,6 +16,3 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
                   'date_joined',
                   'last_login',
                 ]
-
-
-
