@@ -73,14 +73,14 @@
 }
 
 .Gelion-Regular {
-  font-family: "Gelion Regular";
+  font-family: "Gelion Regular" !important;
   font-weight: normal;
 }
 .Gelion-Semi-Bold {
-  font-family: "Gelion Semi Bold";
+  font-family: "Gelion Semi Bold" !important;
 }
 .Gelion-Bold {
-  font-family: "Gelion Bold";
+  font-family: "Gelion Bold" !important;
 }
 
 /* Auto fill background color on inputs */
@@ -89,4 +89,12 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 30px rgb(234, 255, 225) inset !important;
+}
+
+.btn {
+  @apply bg-[#4558ff] text-white text-center rounded-lg py-3 Gelion-Semi-Bold cursor-pointer hover:brightness-90 active:outline active:outline-offset-4 active:outline-4 active:outline-[#4558ff];
+}
+
+.input-error {
+  @apply border-[#fb7373] focus:border-[#fb7373] border-[2px] focus:ring-transparent;
 }
