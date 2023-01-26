@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    'backendapp',
+    'userauth',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -161,4 +161,4 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'backendapp.User'
+AUTH_USER_MODEL = 'userauth.User'

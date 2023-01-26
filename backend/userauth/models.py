@@ -10,6 +10,8 @@ class User(AbstractUser):     #Custom user model
     birth_date = models.DateField(null=True, blank=True)
     date_joined = models.DateField(null=True, blank=True)
     last_login = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=False)
+
     
 
     def getfields():          #Returns the fields that can be modified with setattr()
