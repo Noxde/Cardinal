@@ -17,6 +17,8 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+                  
+FRONTEND_DOMAIN = 'http://localhost:3000'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -27,8 +29,10 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
-
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -77,15 +81,11 @@ CORS_ALLOW_CREDENTIALS = True
 
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = [
-       'http://localhost:3000',
-       'http://localhost:8080',
-       'http://localhost',
+        FRONTEND_DOMAIN,
 ]
 
 CSRF_TRUSTED_ORIGINS =  [
-       'http://localhost:3000',
-       'http://localhost:8080',
-       'http://localhost',
+        FRONTEND_DOMAIN,
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -93,7 +93,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR/'userauth'/'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -107,6 +107,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+
+#Email config
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = config("GMAIL_ADDRESS")
+EMAIL_HOST_PASSWORD = config("GMAIL_KEY")
+EMAIL_USE_TLS = True
 
 
 # Database
