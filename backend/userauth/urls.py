@@ -11,6 +11,9 @@ urlpatterns = [
     path('login/',views.login,name='login'),
     path('csrf/', views.csrf),
     path('ping/', views.ping),
+    path('sendconfirmationemail/', views.SendConfirmationEmail,name='SendConfirmationEmail'),
+    path('ConfirmEmail/<uidb64>/<token>', views.ConfirmEmail, name='ConfirmEmail'),
+
     
 
 ]
