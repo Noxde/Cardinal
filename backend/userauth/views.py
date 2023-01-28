@@ -54,7 +54,7 @@ def ConfirmEmail(request, uidb64, token):
         user.save()
 
         
-        return redirect(settings.FRONTEND_DOMAIN,status='Email confirmated successfully.')
+        return redirect(settings.FRONTEND_DOMAIN,status='Email confirmed successfully.')
     
     else:
 
@@ -93,7 +93,13 @@ def login(request):
             user = getuser(username)
     elif username:
         user = getuser(username)
+    
+    #If the credentials match a valid user and the password is correct
     if user and user.check_password(raw_password=password):
+
+        #If the user's email is not confirmed
+        if  not user.is_active:
+            return HttpResponse('User email address is not confirmed.', status=403)
         user.last_login=timezone.now()
         user.save()
         return JsonResponse(getjwtoken(user))
@@ -102,18 +108,26 @@ def login(request):
 
 
 @require_POST
-def register(request):       #Creates a new user with the given data
+def register(request):       #Creates a new user with the given data and sends confirmation email
     data = {
     'username' : request.POST.get('username',False),
     'email' : request.POST.get('email',False),
     'password' : request.POST.get('password',False),
     }
 
+    #Checks for missing credentials
     for key,value in data.items():
         if not value:
             return HttpResponse(f'{key} missing.', status=400)
+    
+    try: #Verifies if the account already exists and requires email confirmation
+        if get_user_model().objects.get(username=data['username'],email=data['email']).is_active == 0: 
+            return HttpResponse('Account already created. Email not confirmed.', status=403)
+    except Exception:
+        pass 
+        
 
-    response=[]
+    response=[] #Verifies if the credentials are already in use
     if  get_user_model().objects.filter(username=data['username']).exists():
         response.append('Username')
     if  get_user_model().objects.filter(email=data['email']).exists():
@@ -121,7 +135,7 @@ def register(request):       #Creates a new user with the given data
     if len(response)==2:
         return HttpResponse('Username and Email already in use.', status=400)
     elif len(response)==1:
-        return HttpResponse(f'{response[0]} missing.', status=400)
+        return HttpResponse(f'{response[0]} already in use.', status=400)
 
     user = get_user_model().objects.create_user(username=data['username'],email=data['email'],password=data['password'])
     datafields = User.getfields()
