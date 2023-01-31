@@ -26,9 +26,24 @@ from .tokens import account_activation_token
 from backend import settings 
 
 
-def SendConfirmationEmail(request):
-    email = request.POST.get('email',False)
-    user = get_user_model().objects.get(email=email)
+def SendConfirmationEmail(request,from_backend=False):
+    if from_backend:
+        email = request.POST.get('email',False)
+        user = get_user_model().objects.get(email=email)
+    else:
+        username = request.POST.get('username',False)
+        email = request.POST.get('email',False)
+        password = request.POST.get('password',False)
+        try:
+            print(username,email,password)
+            user = get_user_model().objects.get(username=username,email=email)
+            print(user.id)
+        except Exception as e:
+            print(e)
+            print('waswasd')
+            return JsonResponse({'status':'Invalid Credentials.'}, status=400)
+        if not user.check_password(raw_password=password):
+            return JsonResponse({'status':'Invalid Password.'}, status=400)
     mail_subject = 'Email confirmation.'
     message = render_to_string('emailconfirmation.html', {
         'user': user.username,
@@ -38,7 +53,12 @@ def SendConfirmationEmail(request):
         'protocol': 'https' if request.is_secure() else 'http'
     })
     email = EmailMessage(mail_subject, message, to=[email])
-    return email.send()
+    if from_backend:
+        return email.send()
+    elif email.send():
+        return JsonResponse({'status':'Confirmation Email Sent'}, status=200)
+    else:
+        return JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
 
 
 def ConfirmEmail(request, uidb64, token):
@@ -153,10 +173,10 @@ def register(request):       #Creates a new user with the given data and sends c
     user.date_joined = datetime.datetime.now()
 
     user.save()
-    if SendConfirmationEmail(request):
+    if SendConfirmationEmail(request,True):
         return JsonResponse({'status':'User Created Successfully: Confirmation Email Sent'}, status=201)
     else:
-        JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
+        return JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
 
 
 class getuserinfo(APIView): #Returns all the relevant data of an user (except the password)
