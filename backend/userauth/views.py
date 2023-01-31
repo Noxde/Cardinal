@@ -4,7 +4,7 @@ from .serializers import UserSerializer
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
-from django.http import HttpResponse
+# from django.http import HttpResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.views.decorators.http import require_POST, require_GET
@@ -99,12 +99,12 @@ def login(request):
 
         #If the user's email is not confirmed
         if  not user.is_active:
-            return HttpResponse('User email address is not confirmed.', status=403)
+            return JsonResponse({'status':'User email address is not confirmed.'}, status=403)
         user.last_login=timezone.now()
         user.save()
         return JsonResponse(getjwtoken(user))
     else:
-        return HttpResponse('Invalid Credentials.', status=400)
+        return JsonResponse({'status':'Invalid Credentials.'}, status=400)
 
 
 @require_POST
@@ -118,11 +118,11 @@ def register(request):       #Creates a new user with the given data and sends c
     #Checks for missing credentials
     for key,value in data.items():
         if not value:
-            return HttpResponse(f'{key} missing.', status=400)
+            return JsonResponse({'status':f'{key} missing.'}, status=400)
     
     try: #Verifies if the account already exists and requires email confirmation
         if get_user_model().objects.get(username=data['username'],email=data['email']).is_active == 0: 
-            return HttpResponse('Account already created. Email not confirmed.', status=403)
+            return JsonResponse({'status':'Account already created. Email not confirmed.'}, status=403)
     except Exception:
         pass 
         
@@ -133,9 +133,9 @@ def register(request):       #Creates a new user with the given data and sends c
     if  get_user_model().objects.filter(email=data['email']).exists():
         response.append('Email')
     if len(response)==2:
-        return HttpResponse('Username and Email already in use.', status=400)
+        return JsonResponse({'status':'Username and Email already in use.'}, status=400)
     elif len(response)==1:
-        return HttpResponse(f'{response[0]} already in use.', status=400)
+        return JsonResponse({'status':f'{response[0]} already in use.'}, status=400)
 
     user = get_user_model().objects.create_user(username=data['username'],email=data['email'],password=data['password'])
     datafields = User.getfields()
@@ -154,9 +154,9 @@ def register(request):       #Creates a new user with the given data and sends c
 
     user.save()
     if SendConfirmationEmail(request):
-        return HttpResponse('User Created Successfully: Confirmation Email Sent', status=201)
+        return JsonResponse({'status':'User Created Successfully: Confirmation Email Sent'}, status=201)
     else:
-        HttpResponse('Failed to send confirmation email.', status=500)
+        JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
 
 
 class getuserinfo(APIView): #Returns all the relevant data of an user (except the password)
@@ -184,7 +184,7 @@ class moduserinfo(APIView): #Allows to modify user data
             else:
                 setattr(user,datafield,data)
         user.save()
-        return HttpResponse('User Created Successfully.', status=201)
+        return JsonResponse({'status':'User Created Successfully.'}, status=201)
 
 
 
