@@ -25,19 +25,89 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Proyectito</title>
+    <style>
+      .wrapper {
+        display: grid;
+        place-items: center;
+        min-height: 90vh;
+        min-width: 90vw;
+      }
+      .spinner {
+  margin-top: 2rem;
+  width: 70px;
+  text-align: center;
+}
+
+.spinner > div {
+  width: 12px;
+  height: 12px;
+  background-color: #0d162a;
+
+  border-radius: 100%;
+  display: inline-block;
+  -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+.spinner .bounce1 {
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+
+.spinner .bounce2 {
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+
+@-webkit-keyframes sk-bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0) }
+  40% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% { 
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  } 40% { 
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+  }
+}
+
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+    <div id="root" class="Gelion-Regular">
+      <div class="wrapper">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <svg
+            width="100px"
+            version="1.0"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMid meet"
+            viewBox="225.92 241.42 151.08 119.68"
+          >
+            <metadata>
+              Created by potrace 1.16, written by Peter Selinger 2001-2019
+            </metadata>
+            <g
+              transform="translate(0.000000,600.000000) scale(0.100000,-0.100000)"
+              fill="#0d162a"
+              stroke="none"
+            >
+              <path
+                d="M2318 3581 c-27 -4 -52 -11 -58 -17 -10 -10 71 -92 435 -447 l110 -107 -52 -98 c-95 -179 -159 -381 -151 -482 l3 -41 51 26 c59 29 168 138 209 208 l28 48 -22 15 c-23 17 -28 56 -8 72 6 5 44 12 82 14 129 8 233 75 363 235 138 170 207 220 344 248 115 24 118 25 118 40 0 11 -12 15 -42 16 -24 0 -92 1 -153 2 l-110 2 -48 37 c-87 68 -144 71 -243 13 l-46 -27 36 -37 c20 -20 36 -47 36 -58 0 -21 -33 -53 -54 -53 -5 0 -82 71 -170 159 -137 135 -169 161 -216 178 -117 44 -336 70 -442 54z"
+              ></path>
+            </g>
+          </svg>
+          <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+          </div>
+        </div>
+    </div>
+    
   </body>
 </html>
