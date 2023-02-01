@@ -41,7 +41,8 @@ function SignUp() {
         }, 2_000);
       } catch (err) {
         toast.update("signup", {
-          render: "Something went wrong, try again later.",
+          render:
+            err?.response?.data || "Something went wrong, try again later.",
           type: "error",
           isLoading: false,
           autoClose: 3_000,

@@ -40,8 +40,6 @@ function Login() {
           isLoading: false,
         });
       } catch (err) {
-        console.error(err);
-
         toast.update("signin", {
           type: "error",
           isLoading: false,
@@ -49,7 +47,8 @@ function Login() {
           closeOnClick: true,
           closeButton: true,
           draggable: true,
-          render: "Something went wrong, try again later.",
+          render:
+            err.response?.data || "Something went wrong, try again later.",
           onClose: () => setDisableSign(false),
         });
       }
