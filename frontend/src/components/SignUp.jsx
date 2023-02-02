@@ -37,12 +37,13 @@ function SignUp() {
           isLoading: false,
         });
         setTimeout(() => {
-          navigate("/signin");
+          navigate("/login");
         }, 2_000);
       } catch (err) {
         toast.update("signup", {
           render:
-            err?.response?.data || "Something went wrong, try again later.",
+            err.response?.data.status ||
+            "Something went wrong, try again later.",
           type: "error",
           isLoading: false,
           autoClose: 3_000,
@@ -174,7 +175,7 @@ function SignUp() {
 
         <p className="text-center mt-5">
           Already have an account?
-          <Link className="ml-3 Gelion-Semi-Bold text-[#131313]" to="/signin">
+          <Link className="ml-3 Gelion-Semi-Bold text-[#131313]" to="/login">
             Sign in
           </Link>
         </p>

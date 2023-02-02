@@ -40,6 +40,7 @@ function Login() {
           isLoading: false,
         });
       } catch (err) {
+        console.log(err);
         toast.update("signin", {
           type: "error",
           isLoading: false,
@@ -48,7 +49,8 @@ function Login() {
           closeButton: true,
           draggable: true,
           render:
-            err.response?.data || "Something went wrong, try again later.",
+            err.response?.data.status ||
+            "Something went wrong, try again later.",
           onClose: () => setDisableSign(false),
         });
       }
@@ -150,7 +152,7 @@ function Login() {
 
         <p className="text-center mt-5">
           Don't have an account?
-          <Link className="ml-3 Gelion-Semi-Bold text-[#131313]" to="/signup">
+          <Link className="ml-3 Gelion-Semi-Bold text-[#131313]" to="/register">
             Sign up
           </Link>
         </p>
