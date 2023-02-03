@@ -7,6 +7,7 @@ from django.middleware.csrf import get_token
 # from django.http import HttpResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from django.views.decorators.http import require_POST, require_GET
 # from django.views.decorators.csrf import ensure_csrf_cookie, requires_csrf_token, csrf_protect
 from django.shortcuts import render, redirect
@@ -75,7 +76,7 @@ def ConfirmEmail(request, uidb64, token):
         user.save()
 
         
-        return redirect(settings.FRONTEND_DOMAIN,status='Email confirmed successfully.')
+        return redirect(f'{settings.FRONTEND_DOMAIN}/signup',status='Email confirmed successfully.')
     
     else:
 
@@ -84,8 +85,11 @@ def ConfirmEmail(request, uidb64, token):
 
 
 def getdatetime(date): #Returns a datetime object from a date in a string ('YYYY.MM.DD')
-    split = date.split('.')
-    return datetime.datetime(int(split[0]),int(split[1]),int(split[2]))
+    try:
+        split = date.split('.')
+        return datetime.datetime(int(split[0]),int(split[1]),int(split[2]))
+    except Exception:
+        return None
 
 @require_GET
 def csrf(request): #Returns the csrf token
@@ -128,7 +132,7 @@ def login(request):
         return JsonResponse({'status':'Invalid Credentials.'}, status=400)
 
 
-@require_POST
+@api_view(['POST'])
 def register(request):       #Creates a new user with the given data and sends confirmation email
     data = {
     'username' : request.POST.get('username',False),
@@ -159,18 +163,17 @@ def register(request):       #Creates a new user with the given data and sends c
         return JsonResponse({'status':f'{response[0]} already in use.'}, status=400)
 
     user = get_user_model().objects.create_user(username=data['username'],email=data['email'],password=data['password'])
-    datafields = User.getfields()
+    datafields = moduserinfo.fields[1:]
     
     for datafield in datafields:
-        data = request.POST.get(datafield,False)
+        data = request.data.get(datafield,False)
 
         if data:
-            if datafield == 'birth_date':
-                setattr(user,datafield,getdatetime(data))
-                
-            else:
-                setattr(user,datafield,data)
-            
+            setattr(user,datafield,data)
+    
+    birth_date = getdatetime(request.data.get('birth_date',False))
+    if birth_date:
+        setattr(user,'birth_date',birth_date) 
     user.date_joined = datetime.datetime.now()
 
     user.save()
@@ -191,22 +194,38 @@ class getuserinfo(APIView): #Returns all the relevant data of an user (except th
 class moduserinfo(APIView): #Allows to modify user data
     permission_classes = [IsAuthenticated]
 
+    fields=[
+        'username',
+        'first_name',
+        'last_name',
+        'about',
+        'region',
+        'lang',
+        'birth_date',
+        'profileimg',
+        'banner',
+        ]
+
     def post(self, request):       #Creates a new user with the given data
-        
+        modifiedfields = []
         user = get_user_model().objects.get(username=request.user.username)
-        datafields = User.getfields()
-        for datafield in datafields:
-            data = request.POST.get(datafield,False)
 
-        if data:
-            if datafield == 'birth_date':
-                setattr(user,datafield,getdatetime(data))
-                
-            else:
-                setattr(user,datafield,data)
+        for datafield in self.fields:
+            data = request.data.get(datafield,False)
+
+            if data:
+                    setattr(user,datafield,data)
+                    modifiedfields.append(datafield)
+
+        birth_date = getdatetime(request.data.get('birth_date',False))
+        if birth_date:
+            setattr(user,'birth_date',birth_date) 
+            modifiedfields.append('birth_date')
         user.save()
-        return JsonResponse({'status':'User Created Successfully.'}, status=201)
-
+        if modifiedfields:
+            return JsonResponse({'status':'User modified Successfully.','modifiedfields':modifiedfields}, status=201)
+        else:
+            return JsonResponse({'status':'Failed to modify user'},status=400)
 
 
 

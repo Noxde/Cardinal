@@ -16,8 +16,8 @@ class User(AbstractUser):     #Custom user model
     following = models.ManyToManyField('self',symmetrical=False,blank=True)
 
 
-    def getfields():          #Returns the fields that can be modified with setattr()
-        fields=['username','email','first_name','last_name','about','region','lang','birth_date']
-        # return [field.name for field in User._meta.get_fields()]
-        return fields
+    def getfields():          #Returns all the names of the fields in User
+ 
+        return [field.name for field in User._meta.get_fields()]
+        
 
