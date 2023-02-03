@@ -46,13 +46,14 @@ def SendConfirmationEmail(request,from_backend=False):
             return JsonResponse({'status':'Invalid Password.'}, status=400)
     mail_subject = 'Email confirmation.'
     message = render_to_string('emailconfirmation.html', {
-        'user': user.username,
+        'username': user.username,
         'domain': get_current_site(request).domain,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': account_activation_token.make_token(user),
         'protocol': 'https' if request.is_secure() else 'http'
     })
     email = EmailMessage(mail_subject, message, to=[email])
+    email.content_subtype = "html"
     if from_backend:
         return email.send()
     elif email.send():

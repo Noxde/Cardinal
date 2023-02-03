@@ -9,10 +9,10 @@ function Home() {
     <div className="max-w-[200px] space-y-2">
       {user && <h1>{user}</h1>}
 
-      <Link className="block btn" to="signup">
+      <Link className="block btn" to="register">
         Sign up
       </Link>
-      <Link className="block btn" to="signin">
+      <Link className="block btn" to="login">
         Sign in
       </Link>
       <Link className="block btn" to="404">
