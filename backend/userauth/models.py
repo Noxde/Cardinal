@@ -13,8 +13,7 @@ class User(AbstractUser):     #Custom user model
     date_joined = models.DateField(null=True, blank=True)
     last_login = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
-    following = models.ManyToManyField('self',symmetrical=False,blank=True)
-
+    follows = models.ManyToManyField('self',symmetrical=False,blank=True)
 
     def getfields():          #Returns all the names of the fields in User
  
