@@ -1,18 +1,27 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from backend.settings import BACKEND_DOMAIN,MEDIA_URL 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for the custom user model
-    following = serializers.SerializerMethodField('following_')
-    followers = serializers.SerializerMethodField('followers_')
+    following = serializers.SerializerMethodField()
+    followers = serializers.SerializerMethodField()
+    profileimg = serializers.SerializerMethodField()
+    banner = serializers.SerializerMethodField()
+
+    def get_banner(self,user):
+        return BACKEND_DOMAIN+MEDIA_URL+user.banner.name
+        
+    def get_profileimg(self,user):
+        return BACKEND_DOMAIN+MEDIA_URL+user.profileimg.name
 
 
-    def following_(self,user):
+    def get_following(self,user):
         list = []
         for user_ in user.follows.all():
             list.append(user_.username)
         return list
     
-    def followers_(self,user):
+    def get_followers(self,user):
         list = []
         for user_ in get_user_model().objects.filter(follows=user.id):
             list.append(user_.username)

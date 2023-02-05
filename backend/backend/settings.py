@@ -20,6 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
                   
 FRONTEND_DOMAIN = 'http://localhost:3000'
+BACKEND_DOMAIN = 'http://localhost:8000'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
