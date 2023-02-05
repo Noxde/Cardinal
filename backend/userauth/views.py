@@ -24,63 +24,11 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
 from .tokens import account_activation_token
 
+
+
+import os
+
 from backend import settings 
-
-
-def SendConfirmationEmail(request,from_backend=False):
-    if from_backend:
-        email = request.POST.get('email',False)
-        user = get_user_model().objects.get(email=email)
-    else:
-        username = request.POST.get('username',False)
-        email = request.POST.get('email',False)
-        password = request.POST.get('password',False)
-        try:
-            print(username,email,password)
-            user = get_user_model().objects.get(username=username,email=email)
-            print(user.id)
-        except Exception as e:
-            print(e)
-            print('waswasd')
-            return JsonResponse({'status':'Invalid Credentials.'}, status=400)
-        if not user.check_password(raw_password=password):
-            return JsonResponse({'status':'Invalid Password.'}, status=400)
-    mail_subject = 'Email confirmation.'
-    message = render_to_string('emailconfirmation.html', {
-        'username': user.username,
-        'domain': get_current_site(request).domain,
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        'token': account_activation_token.make_token(user),
-        'protocol': 'https' if request.is_secure() else 'http'
-    })
-    email = EmailMessage(mail_subject, message, to=[email])
-    email.content_subtype = "html"
-    if from_backend:
-        return email.send()
-    elif email.send():
-        return JsonResponse({'status':'Confirmation Email Sent'}, status=200)
-    else:
-        return JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
-
-
-def ConfirmEmail(request, uidb64, token):
-    User = get_user_model()
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.save()
-
-        
-        return redirect(f'{settings.FRONTEND_DOMAIN}/signup',status='Email confirmed successfully.')
-    
-    else:
-
-        return redirect(settings.FRONTEND_DOMAIN,status='Email confirmation failed.')
 
 
 
@@ -227,7 +175,106 @@ class moduserinfo(APIView): #Allows to modify user data
         else:
             return JsonResponse({'status':'Failed to modify user'},status=400)
 
+class follows(APIView): #Adds and removes users from following
+    permission_classes = [IsAuthenticated]
 
+    def post(self,request):
+        action = request.POST.get('action',False)
+        usernames = request.POST.getlist('usernames',False)
+        if usernames:
+            changes = usernames.copy()
+        else:
+            return JsonResponse({'status':'"usernames" parameter is wrong or misssing.'}, status=400)
+        try:
+            mainUser = request.user
+        except Exception as e:
+            print(e)
+        if action == 'add':
+            for username in usernames:
+                try:
+                    user = get_user_model().objects.get(username=username)
+                    mainUser.follows.add(user)
+                except Exception:
+                    changes.remove(username)
+            if changes:
+                user.save()
+                return JsonResponse({'status':'Addition successful.','changes':changes}, status=201)
+            else:
+                return JsonResponse({'status':'No change was made'}, status=400)
+                
+        elif action == 'remove':
+            for username in usernames:
+                try:
+                    user = get_user_model().objects.get(username=username)
+                    mainUser.follows.remove(user)
+                except Exception:
+                    changes.remove(username)
+            if changes:
+                user.save()
+                return JsonResponse({'status':'Removal successful.','changes':changes}, status=201)
+            else:
+                return JsonResponse({'status':'No change was made'}, status=400)
+
+                
+        else:
+            return JsonResponse({'status':'"action" parameter is wrong or misssing.'}, status=400)
+            
+
+
+
+def SendConfirmationEmail(request,from_backend=False): #Sends the confirmation email
+    if from_backend:
+        email = request.POST.get('email',False)
+        user = get_user_model().objects.get(email=email)
+    else:
+        username = request.POST.get('username',False)
+        email = request.POST.get('email',False)
+        password = request.POST.get('password',False)
+        try:
+            print(username,email,password)
+            user = get_user_model().objects.get(username=username,email=email)
+            print(user.id)
+        except Exception as e:
+            print(e)
+            return JsonResponse({'status':'Invalid Credentials.'}, status=400)
+        if not user.check_password(raw_password=password):
+            return JsonResponse({'status':'Invalid Password.'}, status=400)
+    mail_subject = 'Email confirmation.'
+    message = render_to_string('emailconfirmation.html', {
+        'username': user.username,
+        'domain': get_current_site(request).domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+        'protocol': 'https' if request.is_secure() else 'http'
+    })
+    email = EmailMessage(mail_subject, message, to=[email])
+    email.content_subtype = "html"
+    if from_backend:
+        return email.send()
+    elif email.send():
+        return JsonResponse({'status':'Confirmation Email Sent'}, status=200)
+    else:
+        return JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
+
+
+def ConfirmEmail(request, uidb64, token): 
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+
+        
+        return redirect(f'{settings.FRONTEND_DOMAIN}/signup',status='Email confirmed successfully.')
+    
+    else:
+
+        return redirect(settings.FRONTEND_DOMAIN,status='Email confirmation failed.')
 
 
         
