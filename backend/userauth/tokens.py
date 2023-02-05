@@ -1,6 +1,7 @@
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-import six  
+import six, secrets, string
+
 
 def getjwtoken(user):
     refresh = RefreshToken.for_user(user)
@@ -19,4 +20,9 @@ class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
         )
 
 account_activation_token = AccountActivationTokenGenerator()
+
+def createToken(lenght):
+    alphabet = string.ascii_letters + string.digits
+    password = ''.join(secrets.choice(alphabet) for i in range(lenght))
+    return password
 
