@@ -9,10 +9,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
     banner = serializers.SerializerMethodField()
 
     def get_banner(self,user):
-        return BACKEND_DOMAIN+MEDIA_URL+user.banner.name
+        if user.banner:
+            return BACKEND_DOMAIN+MEDIA_URL+user.banner.name
         
     def get_profileimg(self,user):
-        return BACKEND_DOMAIN+MEDIA_URL+user.profileimg.name
+        if user.profileimg:
+            return BACKEND_DOMAIN+MEDIA_URL+user.profileimg.name
 
 
     def get_following(self,user):
