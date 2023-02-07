@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import User 
+from .models import Emails
 from .serializers import UserSerializer
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
@@ -227,18 +227,17 @@ def SendConfirmationEmail(request,from_backend=False): #Sends the confirmation e
         email = request.POST.get('email',False)
         user = get_user_model().objects.get(email=email)
     else:
-        username = request.POST.get('username',False)
         email = request.POST.get('email',False)
-        password = request.POST.get('password',False)
         try:
-            print(username,email,password)
-            user = get_user_model().objects.get(username=username,email=email)
+            user = get_user_model().objects.get(email=email)
             print(user.id)
         except Exception as e:
             print(e)
             return JsonResponse({'status':'Invalid Credentials.'}, status=400)
-        if not user.check_password(raw_password=password):
-            return JsonResponse({'status':'Invalid Password.'}, status=400)
+    
+    if Emails.spam(user=user,subject=Emails.EMAILCONFIRMATION):
+        return JsonResponse({'status':'Limit of sent emails exceeded, try again later.'}, status=429)
+
     mail_subject = 'Email confirmation.'
     message = render_to_string('emailconfirmation.html', {
         'username': user.username,
@@ -250,11 +249,17 @@ def SendConfirmationEmail(request,from_backend=False): #Sends the confirmation e
     email = EmailMessage(mail_subject, message, to=[email])
     email.content_subtype = "html"
     if from_backend:
-        return email.send()
-    elif email.send():
-        return JsonResponse({'status':'Confirmation Email Sent'}, status=200)
+        if email.send():
+            Emails.objects.create(user=user,subject=Emails.EMAILCONFIRMATION)
+            return True
+        else: 
+            return False
     else:
-        return JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
+        if email.send():
+            Emails.objects.create(user=user,subject=Emails.EMAILCONFIRMATION)
+            return JsonResponse({'status':'Confirmation Email Sent'}, status=200)
+        else:
+            return JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
 
 
 def ConfirmEmail(request, uidb64, token): 
@@ -270,7 +275,7 @@ def ConfirmEmail(request, uidb64, token):
         user.save()
 
         
-        return redirect(f'{settings.FRONTEND_DOMAIN}/signup',status='Email confirmed successfully.')
+        return redirect(f'{settings.FRONTEND_DOMAIN}/login',status='Email confirmed successfully.')
     
     else:
 
