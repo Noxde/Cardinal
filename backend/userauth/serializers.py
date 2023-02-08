@@ -29,7 +29,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
             list.append(user_.username)
         return list
 
-    class Meta:
+    class Meta:  
         model = get_user_model()
         fields = ['id',
                   'username', 
@@ -47,4 +47,21 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
                   'followers',
                   'following',
 
+                ]
+
+class ProfileSerializer(UserSerializer): #Serializer for public profiles
+    following = serializers.SerializerMethodField()
+    followers = serializers.SerializerMethodField()
+    profileimg = serializers.SerializerMethodField()
+    banner = serializers.SerializerMethodField()
+
+    class Meta:
+        model = get_user_model()
+        fields = ['id',
+                    'username', 
+                    'about',
+                    'profileimg',
+                    'banner',
+                    'followers',
+                    'following',
                 ]

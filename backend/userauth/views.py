@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from .models import Emails
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ProfileSerializer
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
@@ -135,8 +135,16 @@ class getuserinfo(APIView): #Returns all the relevant data of an user (except th
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        
+        return JsonResponse(UserSerializer(get_user_model().objects.get(id=request.user.id)).data,safe=False)
 
-        return JsonResponse(UserSerializer(get_user_model().objects.get(username=request.user.username)).data,safe=False)
+
+class getpublicprofile(APIView): #Returns the public data of an user
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        return JsonResponse(ProfileSerializer(get_user_model().objects.get(id=request.user.id)).data,safe=False)
 
 
 class moduserinfo(APIView): #Allows to modify user data
