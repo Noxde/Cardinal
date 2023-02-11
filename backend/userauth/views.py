@@ -139,12 +139,22 @@ class getuserinfo(APIView): #Returns all the relevant data of an user (except th
         return JsonResponse(UserSerializer(get_user_model().objects.get(id=request.user.id)).data,safe=False)
 
 
-class getpublicprofile(APIView): #Returns the public data of an user
-    permission_classes = [IsAuthenticated]
+def getpublicprofile(request,username): #Returns the public data of an user
+    
+    print(username)
 
-    def get(self, request):
+    try:
+        user = get_user_model().objects.get(username=username)
+    except Exception:
+        return JsonResponse({'status':f'Username "{username}" does not match any user.'}, status=400)
 
-        return JsonResponse(ProfileSerializer(get_user_model().objects.get(id=request.user.id)).data,safe=False)
+    try:
+        return JsonResponse(ProfileSerializer(user).data,safe=False)
+        
+    except Exception:
+
+        return JsonResponse({'status':'Failed to serialize profile data'},status=500)
+
 
 
 class moduserinfo(APIView): #Allows to modify user data
