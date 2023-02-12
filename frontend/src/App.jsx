@@ -5,22 +5,27 @@ import Profile from "./components/Profile";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
 import PrivateRoutes from "./utils/PrivateRoutes";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 import { AuthProvider } from "./context/AuthContext";
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          <Route element={<PrivateRoutes />}>
-            <Route path="/register" element={<SignUp />} />
-            <Route path="/login" element={<Login />} />
-          </Route>
-          <Route path="/" element={<Home />} />
-          <Route path="/profile/:username" element={<Profile />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <QueryClientProvider client={queryClient}>
+          <Routes>
+            <Route element={<PrivateRoutes />}>
+              <Route path="/register" element={<SignUp />} />
+              <Route path="/login" element={<Login />} />
+            </Route>
+            <Route path="/" element={<Home />} />
+            <Route path="/profile/" element={<Profile />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </QueryClientProvider>
       </AuthProvider>
     </Router>
   );

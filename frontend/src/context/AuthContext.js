@@ -1,6 +1,6 @@
 import instance from "../utils/Axios.js";
 import qs from "qs";
-// import jwt_decode from "jwt-decode";
+import jwt_decode from "jwt-decode";
 import { createContext, useState } from "react";
 
 const AuthContext = createContext();
@@ -22,15 +22,17 @@ export const AuthProvider = ({ children }) => {
       ? JSON.parse(localStorage.getItem("authTokens"))
       : null
   );
+  //TODO: store user object instead of username
   const [user, setUser] = useState(() =>
     localStorage.getItem("authTokens")
-      ? JSON.parse(localStorage.getItem("authTokens")).access
+      ? jwt_decode(JSON.parse(localStorage.getItem("authTokens")).access)
+          .username
       : null
   );
 
-  let registerUser = async (userInfo) => {
-    let { email, username, password } = userInfo;
-    let csrfToken = await getCsrf();
+  const registerUser = async (userInfo) => {
+    const { email, username, password } = userInfo;
+    const csrfToken = await getCsrf();
 
     await instance.post(
       "/register/",
@@ -48,17 +50,17 @@ export const AuthProvider = ({ children }) => {
     );
   };
 
-  let loginUser = async (userInfo) => {
-    let { login, password } = userInfo;
-    let csrfToken = await getCsrf();
+  const loginUser = async (userInfo) => {
+    const { login, password } = userInfo;
+    const csrfToken = await getCsrf();
 
-    let payload = {
+    const payload = {
       email: login.includes("@") ? login : "",
       username: !login.includes("@") ? login : "",
       password,
     };
 
-    let res = await instance.post("/login/", qs.stringify(payload), {
+    const res = await instance.post("/login/", qs.stringify(payload), {
       headers: {
         "X-CSRFToken": csrfToken,
       },
@@ -69,9 +71,9 @@ export const AuthProvider = ({ children }) => {
       // 2 second timeout to allow for notifications to show up
       setTimeout(() => {
         setAuthTokens(res.data);
-        setUser(res.data.access);
+        setUser(jwt_decode(res.data.access).username);
         localStorage.setItem("authTokens", JSON.stringify(res.data));
-      }, 2_000);
+      }, 1000);
     } else {
       throw new Error("Something went wrong.");
     }
@@ -83,11 +85,38 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("authTokens");
   };
 
+  const getUserInfo = async (callback) => {
+    const { data } = await instance.get("/getuserinfo/", {
+      headers: {
+        Authorization: `Bearer ${authTokens.access}`,
+      },
+      withCredentials: true,
+    });
+
+    if (typeof callback === "function") {
+      callback(data);
+    }
+    return data;
+  };
+
+  const modUserInfo = async (newInfo) => {
+    await instance.post("/moduserinfo/", newInfo, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${authTokens.access}`,
+      },
+      withCredentials: true,
+    });
+  };
+
   let contextData = {
     user,
+    getUserInfo,
+    modUserInfo,
     loginUser,
-    logoutUser,
     registerUser,
+    logoutUser,
+    authTokens,
   };
 
   return (
