@@ -36,3 +36,24 @@ class createpost(APIView): #Creates a new post
             return JsonResponse({'status':'Missing content.'}, status=400)
 
 
+class delete(APIView): #Deletes a post  
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        id = request.data.get('id',False)
+
+        if id:
+            try:
+                Post.objects.get(user=user,id=id).delete()
+                return JsonResponse({'status':'Post Deleted Successfully.'}, status=200)
+
+            except Exception as e:
+                print(e)
+                return JsonResponse({'status':'Failed to Delete Post.'}, status=500)
+        
+        else:
+            return JsonResponse({'status':'Wrong or missing id.'}, status=400)
+
+
+
