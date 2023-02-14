@@ -15,7 +15,5 @@ urlpatterns = [
     path('ping/', views.ping),
     path('sendconfirmationemail/', views.SendConfirmationEmail,name='SendConfirmationEmail'),
     path('ConfirmEmail/<uidb64>/<token>', views.ConfirmEmail, name='ConfirmEmail'),
-
-    
-
+    path('showvalidationpage/<slug:username>/', views.ShowValidationPage, name='showvalidationpage'),
 ]

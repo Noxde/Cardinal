@@ -18,6 +18,7 @@ class User(AbstractUser):     #Custom user model
     last_login = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
     follows = models.ManyToManyField('self',symmetrical=False,blank=True)
+    show_validation = models.BooleanField(default=1)
 
     def __setattr__(self, attr,value): 
         if (attr == 'profileimg' or attr == 'banner') and (value and not isinstance(value,str)):#If the attribute to set is an image

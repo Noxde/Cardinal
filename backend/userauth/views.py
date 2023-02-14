@@ -39,6 +39,7 @@ def getdatetime(date): #Returns a datetime object from a date in a string ('YYYY
     except Exception:
         return None
 
+
 @require_GET
 def csrf(request): #Returns the csrf token
     return JsonResponse({'csrfToken': get_token(request)})
@@ -141,20 +142,22 @@ class getuserinfo(APIView): #Returns all the relevant data of an user (except th
 
 def getpublicprofile(request,username): #Returns the public data of an user
     
-    print(username)
 
     try:
         user = get_user_model().objects.get(username=username)
+        if  not user.is_active:
+            return JsonResponse({'status':f'User "{username}" is not active.'}, status=400)
+
+
     except Exception:
         return JsonResponse({'status':f'Username "{username}" does not match any user.'}, status=400)
 
     try:
-        return JsonResponse(ProfileSerializer(user).data,safe=False)
+        return JsonResponse(ProfileSerializer(user).data,safe=False,status=200)
         
     except Exception:
 
         return JsonResponse({'status':'Failed to serialize profile data'},status=500)
-
 
 
 class moduserinfo(APIView): #Allows to modify user data
@@ -293,23 +296,27 @@ def ConfirmEmail(request, uidb64, token):
         user.save()
 
         
-        return redirect(f'{settings.FRONTEND_DOMAIN}/login',status='Email confirmed successfully.')
+        return redirect(f'{settings.FRONTEND_DOMAIN}/confirmed-email/{user.username}',status='Email confirmed successfully.')
     
     else:
 
         return redirect(settings.FRONTEND_DOMAIN,status='Email confirmation failed.')
 
 
+def ShowValidationPage(request,username): #Returns whether the frontend should render the email validation page (confimed-email/)
+    try:
+        user = get_user_model().objects.get(username=username)
+    except Exception:
+        return JsonResponse({'status':'Username "{username}" did not match any user.'}, status=400)
+    
+    if user.is_active and user.show_validation:
+        user.show_validation = False
+        user.save()
+        return JsonResponse({'result':'Validation page allowed.'}, status=200)
+    else:
+        return JsonResponse({'status':'Validation page denied.'}, status=200)
+
+
         
-        
-
-            
-
-
-
-
-
-
-
 
 
