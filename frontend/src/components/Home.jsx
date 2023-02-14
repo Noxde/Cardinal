@@ -6,7 +6,7 @@ function Home() {
   let { user, logoutUser } = useContext(AuthContext);
 
   return (
-    <div className="max-w-[200px] space-y-2">
+    <div className="w-full h-screen space-y-2 bg-slate-900 text-white">
       {user && <h1>{user}</h1>}
 
       <Link className="block btn" to="register">
@@ -17,6 +17,9 @@ function Home() {
       </Link>
       <Link className="block btn" to="404">
         404
+      </Link>
+      <Link className="block btn" to="profile">
+        Profile
       </Link>
 
       {user && <button onClick={logoutUser}>Log out</button>}
