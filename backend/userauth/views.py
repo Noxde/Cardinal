@@ -312,7 +312,7 @@ def ShowValidationPage(request,username): #Returns whether the frontend should r
     if user.is_active and user.show_validation:
         user.show_validation = False
         user.save()
-        return JsonResponse({'result':'Validation page allowed.'}, status=200)
+        return JsonResponse({'status':'Validation page allowed.'}, status=200)
     else:
         return JsonResponse({'status':'Validation page denied.'}, status=200)
 
