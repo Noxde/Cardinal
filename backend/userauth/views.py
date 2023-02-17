@@ -249,7 +249,7 @@ def SendEmail(request,subject,email): #Sends the confirmation email
     }
     templates = {
             Emails.EMAILCONFIRMATION : 'emailconfirmation.html',
-            Emails.PASSWORDRESET     : 'passwordchange.html',
+            Emails.PASSWORDRESET     : 'passwordreset.html',
             Emails.ACCOUNTDELETE     : 'accountdelete.html'
     }
     try:
@@ -261,10 +261,10 @@ def SendEmail(request,subject,email): #Sends the confirmation email
     if Emails.spam(user=user,subject=subject):
         return JsonResponse({'status':f'Limit of sent "{subject}" emails exceeded, try again later.'}, status=429)
 
-
+    domain = settings.FRONTEND_DOMAIN.split('//')[1] if subject == 'PR' else get_current_site(request).domain
     message = render_to_string(templates[subject], {
         'username': user.username,
-        'domain': get_current_site(request).domain,
+        'domain': domain,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': account_activation_token.make_token(user),
         'protocol': 'https' if request.is_secure() else 'http'
@@ -315,6 +315,27 @@ def DeleteAccount(request, uidb64, token):
     else:
 
         return redirect(settings.FRONTEND_DOMAIN,status='Account deletion failed.')
+
+def ResetPassword(request):
+    uidb64 = request.POST.get('uidb64',False)
+    token = request.POST.get('token',False)
+    password = request.POST.get('password',False)
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.set_password(password)
+        user.save()
+
+        return JsonResponse({'status':'Password reset succesful.'},status=201)
+    
+    else:
+
+        return JsonResponse({'status':'Password reset failed.'},status=400)
 
 
 def ShowValidationPage(request,username): #Returns whether the frontend should render the email validation page (confimed-email/)

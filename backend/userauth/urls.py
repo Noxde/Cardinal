@@ -16,5 +16,7 @@ urlpatterns = [
     path('sendemail/<str:subject>/<str:email>/', views.SendEmail,name='SendEmail'),
     path('emailconfirmation/<uidb64>/<token>', views.ConfirmEmail, name='ConfirmEmail'),
     path('accountdelete/<uidb64>/<token>', views.DeleteAccount, name='DeleteAccount'),
+    path('passwordreset/', views.ResetPassword, name='ResetPassword'),
     path('showvalidationpage/<slug:username>/', views.ShowValidationPage, name='showvalidationpage'),
+
 ]
