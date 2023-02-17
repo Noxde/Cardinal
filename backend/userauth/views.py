@@ -39,6 +39,19 @@ def getdatetime(date): #Returns a datetime object from a date in a string ('YYYY
     except Exception:
         return None
 
+def ValidateEmail(uidb64, token): #Checks if a token sent in an email belongs to a given user
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        return user
+    else:
+        return False
+
 
 @require_GET
 def csrf(request): #Returns the csrf token
@@ -256,7 +269,7 @@ def SendEmail(request,subject,email): #Sends the confirmation email
         user = get_user_model().objects.get(email=email)
     except Exception as e:
         print(e)
-        return JsonResponse({'status':f'Email {email} does not match any user..'}, status=400)
+        return JsonResponse({'status':f'Email "{email}" does not match any user.'}, status=400)
     
     if Emails.spam(user=user,subject=subject):
         return JsonResponse({'status':f'Limit of sent "{subject}" emails exceeded, try again later.'}, status=429)
@@ -280,61 +293,36 @@ def SendEmail(request,subject,email): #Sends the confirmation email
 
 
 def ConfirmEmail(request, uidb64, token): 
-    User = get_user_model()
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and account_activation_token.check_token(user, token):
+    user = ValidateEmail(uidb64,token)
+    if user:
         user.is_active = True
         user.save()
-
-        
         return redirect(f'{settings.FRONTEND_DOMAIN}/confirmed-email/{user.username}',status='Email confirmed successfully.')
     
     else:
-
         return redirect(settings.FRONTEND_DOMAIN,status='Email confirmation failed.')
 
 def DeleteAccount(request, uidb64, token):
-    User = get_user_model()
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and account_activation_token.check_token(user, token):
+    user = ValidateEmail(uidb64,token)
+    if user:
         user.delete()
-
-        
         return redirect(f'{settings.FRONTEND_DOMAIN}/account-delete/',status='Account deleted successfully.')
     
     else:
-
         return redirect(settings.FRONTEND_DOMAIN,status='Account deletion failed.')
 
 def ResetPassword(request):
     uidb64 = request.POST.get('uidb64',False)
     token = request.POST.get('token',False)
     password = request.POST.get('password',False)
-    User = get_user_model()
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and account_activation_token.check_token(user, token):
+    user = ValidateEmail(uidb64,token)
+    if user:
         user.set_password(password)
         user.save()
 
         return JsonResponse({'status':'Password reset succesful.'},status=201)
     
     else:
-
         return JsonResponse({'status':'Password reset failed.'},status=400)
 
 
