@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Emails
+from .models import Emails 
 from .serializers import UserSerializer, ProfileSerializer
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
@@ -126,10 +126,8 @@ def register(request):       #Creates a new user with the given data and sends c
     user.date_joined = datetime.datetime.now()
 
     user.save()
-    if SendConfirmationEmail(request,True):
-        return JsonResponse({'status':'User Created Successfully: Confirmation Email Sent'}, status=201)
-    else:
-        return JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
+
+    return redirect ('SendEmail',subject=Emails.EMAILCONFIRMATION,email=user.email)
 
 
 class getuserinfo(APIView): #Returns all the relevant data of an user (except the password)
@@ -242,45 +240,43 @@ class follows(APIView): #Adds and removes users from following
             
 
 
-
-def SendConfirmationEmail(request,from_backend=False): #Sends the confirmation email
-    if from_backend:
-        email = request.POST.get('email',False)
+@require_GET
+def SendEmail(request,subject,email): #Sends the confirmation email
+    mail_subjects = {
+            Emails.EMAILCONFIRMATION : 'Email confirmation',
+            Emails.PASSWORDRESET     : 'Password reset',
+            Emails.ACCOUNTDELETE     : 'Account delete'
+    }
+    templates = {
+            Emails.EMAILCONFIRMATION : 'emailconfirmation.html',
+            Emails.PASSWORDRESET     : 'passwordchange.html',
+            Emails.ACCOUNTDELETE     : 'accountdelete.html'
+    }
+    try:
         user = get_user_model().objects.get(email=email)
-    else:
-        email = request.POST.get('email',False)
-        try:
-            user = get_user_model().objects.get(email=email)
-            print(user.id)
-        except Exception as e:
-            print(e)
-            return JsonResponse({'status':'Invalid Credentials.'}, status=400)
+    except Exception as e:
+        print(e)
+        return JsonResponse({'status':f'Email {email} does not match any user..'}, status=400)
     
-    if Emails.spam(user=user,subject=Emails.EMAILCONFIRMATION):
-        return JsonResponse({'status':'Limit of sent emails exceeded, try again later.'}, status=429)
+    if Emails.spam(user=user,subject=subject):
+        return JsonResponse({'status':f'Limit of sent "{subject}" emails exceeded, try again later.'}, status=429)
 
-    mail_subject = 'Email confirmation.'
-    message = render_to_string('emailconfirmation.html', {
+
+    message = render_to_string(templates[subject], {
         'username': user.username,
         'domain': get_current_site(request).domain,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': account_activation_token.make_token(user),
         'protocol': 'https' if request.is_secure() else 'http'
     })
-    email = EmailMessage(mail_subject, message, to=[email])
+    email = EmailMessage(mail_subjects[subject]+'.', message, to=[email])
     email.content_subtype = "html"
-    if from_backend:
-        if email.send():
-            Emails.objects.create(user=user,subject=Emails.EMAILCONFIRMATION)
-            return True
-        else: 
-            return False
+
+    if email.send():
+        Emails.objects.create(user=user,subject=subject)
+        return JsonResponse({'status':f'{mail_subjects[subject]} email sent.'}, status=200)
     else:
-        if email.send():
-            Emails.objects.create(user=user,subject=Emails.EMAILCONFIRMATION)
-            return JsonResponse({'status':'Confirmation Email Sent'}, status=200)
-        else:
-            return JsonResponse({'status':'Failed to send confirmation email.'}, status=500)
+        return JsonResponse({'status':f'Failed to send {mail_subjects[subject]} email.'}, status=500)
 
 
 def ConfirmEmail(request, uidb64, token): 
@@ -301,6 +297,24 @@ def ConfirmEmail(request, uidb64, token):
     else:
 
         return redirect(settings.FRONTEND_DOMAIN,status='Email confirmation failed.')
+
+def DeleteAccount(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.delete()
+
+        
+        return redirect(f'{settings.FRONTEND_DOMAIN}/account-delete/',status='Account deleted successfully.')
+    
+    else:
+
+        return redirect(settings.FRONTEND_DOMAIN,status='Account deletion failed.')
 
 
 def ShowValidationPage(request,username): #Returns whether the frontend should render the email validation page (confimed-email/)

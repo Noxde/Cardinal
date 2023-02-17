@@ -13,7 +13,8 @@ urlpatterns = [
     path('login/',views.login,name='login'),
     path('csrf/', views.csrf),
     path('ping/', views.ping),
-    path('sendconfirmationemail/', views.SendConfirmationEmail,name='SendConfirmationEmail'),
-    path('ConfirmEmail/<uidb64>/<token>', views.ConfirmEmail, name='ConfirmEmail'),
+    path('sendemail/<str:subject>/<str:email>/', views.SendEmail,name='SendEmail'),
+    path('emailconfirmation/<uidb64>/<token>', views.ConfirmEmail, name='ConfirmEmail'),
+    path('accountdelete/<uidb64>/<token>', views.DeleteAccount, name='DeleteAccount'),
     path('showvalidationpage/<slug:username>/', views.ShowValidationPage, name='showvalidationpage'),
 ]

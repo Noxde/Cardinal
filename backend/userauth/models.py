@@ -38,6 +38,7 @@ class User(AbstractUser):     #Custom user model
 class Emails(models.Model): #Keeps a log of all the emails sent to avoid spamming
     EMAILCONFIRMATION = 'EC'
     PASSWORDRESET = 'PR'
+    ACCOUNTDELETE = 'AD'
     
     emailsubjects = [
     (EMAILCONFIRMATION, 'EmailConfirmation'),
