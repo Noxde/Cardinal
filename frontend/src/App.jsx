@@ -5,6 +5,7 @@ import Profile from "./components/Profile";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
 import PrivateRoutes from "./utils/PrivateRoutes";
+import ConfirmedEmail from "./components/ConfirmedEmail";
 import { QueryClient, QueryClientProvider } from "react-query";
 
 import { AuthProvider } from "./context/AuthContext";
@@ -17,13 +18,13 @@ function App() {
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
           <Routes>
-            <Route element={<PrivateRoutes />}>
-              <Route path="/register" element={<SignUp />} />
-              <Route path="/login" element={<Login />} />
-            </Route>
             <Route path="/" element={<Home />} />
-            <Route path="/profile/" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/confirmed-email/:user" element={<ConfirmedEmail />} />
+            <Route path="/register" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
+            {/* <Route element={<PrivateRoutes />}></Route> */}
           </Routes>
         </QueryClientProvider>
       </AuthProvider>
