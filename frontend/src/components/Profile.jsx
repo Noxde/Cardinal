@@ -175,7 +175,7 @@ function Home() {
               Posts and replies
             </button>
             <button disabled className="opacity-80">
-              Medias
+              Media
             </button>
             <button disabled className="opacity-80">
               Like
