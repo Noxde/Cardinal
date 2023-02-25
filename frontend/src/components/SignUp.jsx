@@ -1,16 +1,17 @@
 import { useState, useContext } from "react";
 import { useFormik } from "formik";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { SignUpSchema } from "../schema";
 import AuthContext from "../context/AuthContext";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ConfirmEmail from "./ConfirmEmail";
 
 function SignUp() {
-  const navigate = useNavigate();
-  const { registerUser } = useContext(AuthContext);
+  const { user, registerUser } = useContext(AuthContext);
   const [disable, setDisable] = useState(false);
+  const [emailConfirmation, setEmailConfirmation] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -32,12 +33,12 @@ function SignUp() {
           password: values.password,
         });
         toast.update("signup", {
-          render: "Signed up successfuly. Redirecting to Sign in...",
+          render: "Signed up successfuly.",
           type: "success",
           isLoading: false,
         });
         setTimeout(() => {
-          navigate("/login");
+          setEmailConfirmation(true);
         }, 2_000);
       } catch (err) {
         toast.update("signup", {
@@ -56,7 +57,11 @@ function SignUp() {
     },
   });
 
-  return (
+  return user ? (
+    <Navigate to={"/"} />
+  ) : emailConfirmation ? (
+    <ConfirmEmail formik={formik} />
+  ) : (
     <div className="min-h-screen grid place-items-center Gelion-Regular text-[#606161] py-5">
       <div className="w-full px-4">
         <div className="text-center space-y-4 mb-5">
@@ -166,7 +171,7 @@ function SignUp() {
           </div>
 
           <input
-            className="enabled:bg-[#4558ff] text-white w-full mt-5 rounded-lg py-3 Gelion-Semi-Bold cursor-pointer enabled:hover:brightness-90 enabled:active:outline enabled:active:outline-offset-4 enabled:active:outline-4 enabled:active:outline-[#4558ff] disabled:bg-[hsl(234,100%,20%)] disabled:cursor-not-allowed"
+            className="enabled:bg-[#4558ff] text-white w-full mt-5 rounded-full py-3 Gelion-Semi-Bold cursor-pointer enabled:hover:brightness-90 enabled:active:outline enabled:active:outline-offset-4 enabled:active:outline-4 enabled:active:outline-[#4558ff] disabled:bg-[hsl(234,100%,20%)] disabled:cursor-not-allowed"
             type="submit"
             disabled={disable ? true : false}
             value="Sign up"

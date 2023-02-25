@@ -278,6 +278,7 @@ def SendEmail(request,subject,email): #Sends the confirmation email
     message = render_to_string(templates[subject], {
         'username': user.username,
         'domain': domain,
+        'email': email,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': account_activation_token.make_token(user),
         'protocol': 'https' if request.is_secure() else 'http'

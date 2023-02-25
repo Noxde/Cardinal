@@ -8,7 +8,7 @@ const AuthContext = createContext();
 const getCsrf = async () => {
   let {
     data: { csrfToken },
-  } = await instance.get("/csrf", {
+  } = await instance.get("/csrf/", {
     withCredentials: true,
   });
   return csrfToken;
@@ -109,11 +109,36 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  /**
+   *
+   * @param {"EC" | "PR" | "AD"} subject
+   * @param {string} email
+   * @returns status
+   */
+  const sendEmail = async (subject, email) => {
+    const csrfToken = await getCsrf();
+
+    try {
+      let {
+        data: { status },
+      } = await instance.get(`/sendemail/${subject}/${email}`, {
+        headers: {
+          "X-CSRFToken": csrfToken,
+        },
+        withCredentials: true,
+      });
+      return status;
+    } catch (err) {
+      return err.response?.data?.status || "Something went wrong.";
+    }
+  };
+
   let contextData = {
     user,
     getUserInfo,
     modUserInfo,
     loginUser,
+    sendEmail,
     registerUser,
     logoutUser,
     authTokens,

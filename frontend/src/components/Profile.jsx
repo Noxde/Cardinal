@@ -13,7 +13,7 @@ import Post from "./Post";
 
 import Posts from "../utils/posts";
 
-function Home() {
+function Profile() {
   let { getUserInfo, modUserInfo } = useContext(AuthContext);
   const [posts, setPosts] = useState(Posts); // No posts from the backend yet
   const [isFollowed, setIsFollowed] = useState(false);
@@ -175,7 +175,7 @@ function Home() {
               Posts and replies
             </button>
             <button disabled className="opacity-80">
-              Medias
+              Media
             </button>
             <button disabled className="opacity-80">
               Like
@@ -228,4 +228,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Profile;
