@@ -19,6 +19,7 @@ class User(AbstractUser):     #Custom user model
     is_active = models.BooleanField(default=False)
     follows = models.ManyToManyField('self',symmetrical=False,blank=True)
     show_validation = models.BooleanField(default=1)
+    last_post = models.IntegerField(default=0)
 
     def __setattr__(self, attr,value): 
         if (attr == 'profileimg' or attr == 'banner') and (value and not isinstance(value,str)):#If the attribute to set is an image

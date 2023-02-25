@@ -28,6 +28,7 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
     class Meta:
         model = Post
         fields = [
+                'id',
                 'user',
                 'creation_time',
                 'content',
