@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Post, Files
+from .models import Post, Files, Comment
 from .serializers import PostSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -146,3 +146,32 @@ class getpost(APIView): #Returns posts from a user profile or from the users he 
         
         else:
             return JsonResponse({'status':f'Wrong context parameter.'},status=404)
+        
+
+class createcomment(APIView): #Creates a new comment on a post 
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        content = request.data.get('content',False)
+        postid = request.data.get('postid',False)
+
+        try:
+            post = Post.objects.get(id=postid)
+        except Exception:
+            return JsonResponse({'status':'Id does not match any post.'}, status=400)
+
+        
+        
+        if content:
+            try:
+                Comment.objects.create(user=user,content=content,post=post)
+
+                return JsonResponse({'status':'Comment Created Successfully.'}, status=201)
+
+            except Exception as e:
+                print(e)
+                return JsonResponse({'status':'Failed to Create Comment.'}, status=500)
+        
+        else:
+            return JsonResponse({'status':'Content Parameter Missing.'}, status=400)
