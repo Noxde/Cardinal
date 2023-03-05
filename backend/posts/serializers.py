@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from backend.settings import BACKEND_DOMAIN,MEDIA_URL 
-from .models import Post, Files
+from .models import Post, Files, Comment
 
 class PostSerializer(serializers.ModelSerializer): #Serializer for the Post model
     likes = serializers.SerializerMethodField()
@@ -36,3 +36,15 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
                 'files',
                     ]
 
+
+class CommentSerializer(serializers.ModelSerializer): #Serializer for the Comment model
+    class Meta:
+        model = Comment
+        fields = [
+                 'id',
+                 'user',
+                 'post',
+                 'content',
+                 'creation_time',
+                 ]
+        
