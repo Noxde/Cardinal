@@ -175,3 +175,19 @@ class createcomment(APIView): #Creates a new comment on a post
         
         else:
             return JsonResponse({'status':'Content Parameter Missing.'}, status=400)
+        
+
+class deletecomment(APIView): #Deletes a comment  
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        commentid = request.data.get('commentid',False)
+
+        try:
+            comment = Comment.objects.get(user=user,id=commentid)
+            comment.delete()
+            return JsonResponse({'status':'Comment Deleted Successfully.'}, status=200)
+
+        except Exception:
+            return JsonResponse({'status':f'Id "{commentid}" does not match any comment from user "{user}".'}, status=400)
