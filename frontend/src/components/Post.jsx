@@ -32,7 +32,7 @@ function Post({ author, content, attachment }) {
     <>
       {commentsModal && (
         <div
-          className="fixed top-0 bottom-0 w-full bg-[#0d162acd] z-50"
+          className="fixed inset-0 w-full bg-[#0d162acd] z-50"
           onKeyDown={(e) => (e.code === "Enter" ? addComment() : null)}
         >
           <div className="absolute translate-x-0 z-[999] h-3/4 max-w-[500px] overflow-auto bg-white top-0 left-2 right-2 bottom-0 m-auto rounded-xl">
