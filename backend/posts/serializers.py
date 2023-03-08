@@ -4,7 +4,7 @@ from .models import Post, Files, Comment
 
 class PostSerializer(serializers.ModelSerializer): #Serializer for the Post model
     likes = serializers.SerializerMethodField()
-    user = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
     files = serializers.SerializerMethodField()
 
     def get_likes(self,post):
@@ -13,9 +13,13 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
             list.append(user_.username)
         return list
         
-    def get_user(self,post):
-
-        return post.user.username
+    def get_author(self,post):
+        profileimg = post.user.profileimg.name
+        url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+            
+        return {'username':post.user.username,
+                'profileimg':url
+        }
 
     def get_files(self,post):
         fileslist = []
@@ -29,7 +33,7 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
         model = Post
         fields = [
                 'id',
-                'user',
+                'author',
                 'creation_time',
                 'content',
                 'likes',
