@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from .models import Post, Files, Comment
-from .serializers import PostSerializer
+from .serializers import PostSerializer, CommentSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
@@ -147,6 +147,36 @@ class getpost(APIView): #Returns posts from a user profile or from the users he 
         else:
             return JsonResponse({'status':f'Wrong context parameter.'},status=404)
         
+
+class getcomment(APIView): #Returns comments from a post
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request , id, refresh):
+        comments_per_scroll = 10
+        loguser = request.user
+        if refresh != 'False':
+            loguser.last_comment = 0
+            loguser.save()
+        last_comment = loguser.last_comment
+        if last_comment:
+            qs = Comment.objects.filter(post=id,id__lt=last_comment).order_by('-id')[0:comments_per_scroll]
+        else:
+            qs = Comment.objects.filter(post=id).order_by('-id')[0:comments_per_scroll]
+        if not qs.exists():
+            try:
+                post = Post.objects.get(id = id)
+            except Post.DoesNotExist:
+                return JsonResponse({'status':f'Id "{id}" does not match any post.'},status=404)
+            if last_comment >= len(Comment.objects.filter(id=id)):
+                return JsonResponse({'status':f'There are no more available comments for post {id}.'},status=404)
+
+        response = {}
+        for n,comment in enumerate(qs):
+            response[str(n)] = CommentSerializer(comment).data
+        loguser.last_comment = comment.id
+        loguser.save()
+        return JsonResponse(response)
+
 
 class createcomment(APIView): #Creates a new comment on a post 
     permission_classes = [IsAuthenticated]
