@@ -60,7 +60,7 @@ class delete(APIView): #Deletes a post
             return JsonResponse({'status':'Wrong or missing id.'}, status=400)
 
 
-class likes(APIView): #Adds and removes likes from posts  
+class likes(APIView): #Adds and removes likes from posts and comments
     permission_classes = [IsAuthenticated]
 
     def post(self, request, context, action,id):
@@ -78,9 +78,26 @@ class likes(APIView): #Adds and removes likes from posts
                return JsonResponse({'status':'Wrong action.'}, status=400)
             
             return JsonResponse({'status':'Operation Successful.'}, status=200)
+
+        def commentlikes():
+            try:
+                comment = Comment.objects.get(id=id)
+            except Exception:
+                return JsonResponse({'status':'Id does not match any comment.'}, status=400)
+            if action == 'add':
+                comment.likes.add(user)
+            elif action == 'remove':
+                comment.likes.remove(user)
+            else:
+               return JsonResponse({'status':'Wrong action.'}, status=400)
+            
+            return JsonResponse({'status':'Operation Successful.'}, status=200)
             
         if context == 'post':
             return postlikes()        
+        
+        elif context == 'comment':
+            return commentlikes()        
         
         else:
             return JsonResponse({'status':'Wrong context.'}, status=400)
@@ -169,7 +186,7 @@ class getcomment(APIView): #Returns comments from a post
                 post = Post.objects.get(id = id)
             except Post.DoesNotExist:
                 return JsonResponse({'status':f'Id "{id}" does not match any post.'},status=404)
-            if last_comment >= len(Comment.objects.filter(id=id)):
+            if last_comment >= len(Comment.objects.filter(post=id)):
                 return JsonResponse({'status':f'There are no more available comments for post {id}.'},status=404)
 
         response = {}

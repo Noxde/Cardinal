@@ -14,6 +14,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post,on_delete=models.CASCADE)
     content = models.TextField(max_length=120)
     creation_time = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(get_user_model(),symmetrical=False,blank=True,related_name='commentlikes')
 
 class PostFiles (models.Model): #Model for posts files
     post = models.ForeignKey(Post,on_delete=models.CASCADE)

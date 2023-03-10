@@ -10,9 +10,11 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
     def get_likes(self,post):
         list = []
         for user_ in post.likes.all():
+            profileimg = user_.profileimg.name
+            url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
             list.append({
                 'username':user_.username,
-                'profileimg':user_.profileimg.name,
+                'profileimg':url,
                 })
         return list
         
@@ -47,6 +49,18 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
 class CommentSerializer(serializers.ModelSerializer): #Serializer for the Comment model
     files = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
+
+    def get_likes(self,comment):
+        list = []
+        for user_ in comment.likes.all():
+            profileimg = user_.profileimg.name
+            url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+            list.append({
+                'username':user_.username,
+                'profileimg':url,
+                })
+        return list
 
     def get_files(self,comment):
         fileslist = []
@@ -73,4 +87,5 @@ class CommentSerializer(serializers.ModelSerializer): #Serializer for the Commen
                  'content',
                  'creation_time',
                  'files',
+                 'likes',
                  ]
