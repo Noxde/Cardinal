@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from backend.settings import BACKEND_DOMAIN,MEDIA_URL 
-from .models import Post, Files, Comment
+from .models import Post, PostFiles, Comment
 
 class PostSerializer(serializers.ModelSerializer): #Serializer for the Post model
     likes = serializers.SerializerMethodField()
@@ -10,7 +10,10 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
     def get_likes(self,post):
         list = []
         for user_ in post.likes.all():
-            list.append(user_.username)
+            list.append({
+                'username':user_.username,
+                'profileimg':user_.profileimg.name,
+                })
         return list
         
     def get_author(self,post):
@@ -23,7 +26,7 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
 
     def get_files(self,post):
         fileslist = []
-        files = Files.objects.filter(post=post)
+        files = PostFiles.objects.filter(post=post)
         if files:
             for file in files:
                 fileslist.append(BACKEND_DOMAIN+MEDIA_URL+file.file.name)
