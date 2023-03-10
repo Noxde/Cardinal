@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Post, Files, Comment
+from .models import Post, PostFiles,CommentFiles, Comment
 from .serializers import PostSerializer, CommentSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -20,13 +20,15 @@ class createpost(APIView): #Creates a new post
             file = request.data.get(str(_),False)
             if file:
                 files.append(file)
+            else:
+                break
         
         if content:
             try:
                 post = Post.objects.create(user=user,content=content)
                 if files:
                     for file in files:
-                        Files.objects.create(post=post,file=file)
+                        PostFiles.objects.create(post=post,file=file)
 
                 return JsonResponse({'status':'Post Created Successfully.'}, status=201)
 
@@ -191,11 +193,21 @@ class createcomment(APIView): #Creates a new comment on a post
         except Exception:
             return JsonResponse({'status':'Id does not match any post.'}, status=400)
 
-        
-        
         if content:
+            files = []
+            for _ in range(10):
+                file = request.data.get(str(_),False)
+                if file:
+                    files.append(file)
+                else: 
+                    break
+
+
             try:
-                Comment.objects.create(user=user,content=content,post=post)
+                comment = Comment.objects.create(user=user,content=content,post=post)
+                if files:
+                    for file in files:
+                        CommentFiles.objects.create(comment=comment,file=file)
 
                 return JsonResponse({'status':'Comment Created Successfully.'}, status=201)
 

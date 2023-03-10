@@ -15,6 +15,10 @@ class Comment(models.Model):
     content = models.TextField(max_length=120)
     creation_time = models.DateTimeField(auto_now_add=True)
 
-class Files (models.Model): #Model for posts files
+class PostFiles (models.Model): #Model for posts files
     post = models.ForeignKey(Post,on_delete=models.CASCADE)
-    file = models.FileField(upload_to='post/',blank=True)
+    file = models.FileField(upload_to='post/')
+
+class CommentFiles (models.Model): #Model for posts files
+    comment = models.ForeignKey(Comment,on_delete=models.CASCADE)
+    file = models.FileField(upload_to='post/')
