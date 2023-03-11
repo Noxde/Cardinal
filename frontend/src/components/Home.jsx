@@ -7,7 +7,7 @@ function Home() {
 
   return (
     <div className="w-full h-screen space-y-2 bg-slate-900 text-white">
-      {user && <h1>{user}</h1>}
+      {user && <h1>{user.username}</h1>}
 
       <Link className="block btn" to="register">
         Sign up

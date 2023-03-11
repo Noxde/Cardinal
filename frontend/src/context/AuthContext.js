@@ -24,9 +24,8 @@ export const AuthProvider = ({ children }) => {
   );
   //TODO: store user object instead of username
   const [user, setUser] = useState(() =>
-    localStorage.getItem("authTokens")
-      ? jwt_decode(JSON.parse(localStorage.getItem("authTokens")).access)
-          .username
+    localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user"))
       : null
   );
 
@@ -69,10 +68,22 @@ export const AuthProvider = ({ children }) => {
 
     if (res.status === 200) {
       // 2 second timeout to allow for notifications to show up
-      setTimeout(() => {
+      setTimeout(async () => {
+        let { data } = await instance.get("/getuserinfo/", {
+          headers: {
+            Authorization: `Bearer ${res.data.access}`,
+          },
+          withCredentials: true,
+        });
+        // Update states
         setAuthTokens(res.data);
-        setUser(jwt_decode(res.data.access).username);
+        setUser({ ...jwt_decode(res.data.access), ...data });
+        // Update local storage
         localStorage.setItem("authTokens", JSON.stringify(res.data));
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ ...jwt_decode(res.data.access), ...data })
+        );
       }, 1000);
     } else {
       throw new Error("Something went wrong.");
@@ -83,30 +94,7 @@ export const AuthProvider = ({ children }) => {
     setAuthTokens(null);
     setUser(null);
     localStorage.removeItem("authTokens");
-  };
-
-  const getUserInfo = async (callback) => {
-    const { data } = await instance.get("/getuserinfo/", {
-      headers: {
-        Authorization: `Bearer ${authTokens.access}`,
-      },
-      withCredentials: true,
-    });
-
-    if (typeof callback === "function") {
-      callback(data);
-    }
-    return data;
-  };
-
-  const modUserInfo = async (newInfo) => {
-    await instance.post("/moduserinfo/", newInfo, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${authTokens.access}`,
-      },
-      withCredentials: true,
-    });
+    localStorage.removeItem("user");
   };
 
   /**
@@ -135,13 +123,13 @@ export const AuthProvider = ({ children }) => {
 
   let contextData = {
     user,
-    getUserInfo,
-    modUserInfo,
+    setUser,
     loginUser,
     sendEmail,
     registerUser,
     logoutUser,
     authTokens,
+    setAuthTokens,
   };
 
   return (

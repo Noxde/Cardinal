@@ -1,5 +1,3 @@
-import React from "react";
-
 function Comment({ author: { profilePicture, username }, content }) {
   return (
     <div className="flex items-start p-4">
