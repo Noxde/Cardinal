@@ -6,6 +6,12 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
     likes = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
     files = serializers.SerializerMethodField()
+    topcomment = serializers.SerializerMethodField()
+
+    def get_topcomment(self,post):
+        topcomment = Post.get_top_comment(post)
+        if topcomment:
+            return CommentSerializer(topcomment).data
 
     def get_likes(self,post):
         list = []
@@ -43,6 +49,7 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
                 'content',
                 'likes',
                 'files',
+                'topcomment',
                     ]
 
 
