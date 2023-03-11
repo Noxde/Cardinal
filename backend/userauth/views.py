@@ -36,7 +36,7 @@ def getdatetime(date): #Returns a datetime object from a date in a string ('YYYY
     try:
         split = date.split('.')
         return datetime.datetime(int(split[0]),int(split[1]),int(split[2]))
-    except Exception:
+    except (IndexError, ValueError):
         return None
 
 def ValidateEmail(uidb64, token): #Checks if a token sent in an email belongs to a given user
@@ -71,12 +71,12 @@ def login(request):
     def getuser(username):
         try:
             return get_user_model().objects.get(username=username)
-        except Exception:
+        except get_user_model().DoesNotExist:
             return None
     if email:
         try:
             user = get_user_model().objects.get(email=email)
-        except Exception:
+        except get_user_model().DoesNotExist:
             user = getuser(username)
     elif username:
         user = getuser(username)
@@ -110,7 +110,7 @@ def register(request):       #Creates a new user with the given data and sends c
     try: #Verifies if the account already exists and requires email confirmation
         if get_user_model().objects.get(username=data['username'],email=data['email']).is_active == 0: 
             return JsonResponse({'status':'Account already created. Email not confirmed.'}, status=403)
-    except Exception:
+    except get_user_model().DoesNotExist:
         pass 
         
 
@@ -160,15 +160,13 @@ def getpublicprofile(request,username): #Returns the public data of an user
             return JsonResponse({'status':f'User "{username}" is not active.'}, status=400)
 
 
-    except Exception:
+    except get_user_model().DoesNotExist:
+        print('hi')
         return JsonResponse({'status':f'Username "{username}" does not match any user.'}, status=400)
 
-    try:
-        return JsonResponse(ProfileSerializer(user).data,safe=False,status=200)
-        
-    except Exception:
 
-        return JsonResponse({'status':'Failed to serialize profile data'},status=500)
+    return JsonResponse(ProfileSerializer(user).data,status=200)
+        
 
 
 class moduserinfo(APIView): #Allows to modify user data
@@ -217,16 +215,13 @@ class follows(APIView): #Adds and removes users from following
             changes = usernames.copy()
         else:
             return JsonResponse({'status':'"usernames" parameter is wrong or misssing.'}, status=400)
-        try:
-            mainUser = request.user
-        except Exception as e:
-            print(e)
+        mainUser = request.user
         if action == 'add':
             for username in usernames:
                 try:
                     user = get_user_model().objects.get(username=username)
                     mainUser.follows.add(user)
-                except Exception:
+                except get_user_model().DoesNotExist:
                     changes.remove(username)
             if changes:
                 user.save()
@@ -239,7 +234,7 @@ class follows(APIView): #Adds and removes users from following
                 try:
                     user = get_user_model().objects.get(username=username)
                     mainUser.follows.remove(user)
-                except Exception:
+                except get_user_model().DoesNotExist:
                     changes.remove(username)
             if changes:
                 user.save()
@@ -267,8 +262,7 @@ def SendEmail(request,subject,email): #Sends the confirmation email
     }
     try:
         user = get_user_model().objects.get(email=email)
-    except Exception as e:
-        print(e)
+    except get_user_model().DoesNotExist:
         return JsonResponse({'status':f'Email "{email}" does not match any user.'}, status=400)
     
     if Emails.spam(user=user,subject=subject):
@@ -330,7 +324,7 @@ def ResetPassword(request):
 def ShowValidationPage(request,username): #Returns whether the frontend should render the email validation page (confimed-email/)
     try:
         user = get_user_model().objects.get(username=username)
-    except Exception:
+    except get_user_model().DoesNotExist:
         return JsonResponse({'status':'Username "{username}" did not match any user.'}, status=400)
     
     if user.is_active and user.show_validation:

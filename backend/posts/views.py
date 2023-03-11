@@ -32,8 +32,7 @@ class createpost(APIView): #Creates a new post
 
                 return JsonResponse({'status':'Post Created Successfully.'}, status=201)
 
-            except Exception as e:
-                print(e)
+            except Post.DoesNotExist:
                 return JsonResponse({'status':'Failed to Create Post.'}, status=500)
         
         else:
@@ -52,8 +51,7 @@ class delete(APIView): #Deletes a post
                 Post.objects.get(user=user,id=id).delete()
                 return JsonResponse({'status':'Post Deleted Successfully.'}, status=200)
 
-            except Exception as e:
-                print(e)
+            except Post.DoesNotExist:
                 return JsonResponse({'status':'Failed to Delete Post.'}, status=500)
         
         else:
@@ -68,7 +66,7 @@ class likes(APIView): #Adds and removes likes from posts and comments
         def postlikes():
             try:
                 post = Post.objects.get(id=id)
-            except Exception:
+            except Post.DoesNotExist:
                 return JsonResponse({'status':'Id does not match any post.'}, status=400)
             if action == 'add':
                 post.likes.add(user)
@@ -82,7 +80,7 @@ class likes(APIView): #Adds and removes likes from posts and comments
         def commentlikes():
             try:
                 comment = Comment.objects.get(id=id)
-            except Exception:
+            except Comment.DoesNotExist:
                 return JsonResponse({'status':'Id does not match any comment.'}, status=400)
             if action == 'add':
                 comment.likes.add(user)
@@ -122,7 +120,7 @@ class getpost(APIView): #Returns posts from a user profile or from the users he 
     
             try:
                 user = get_user_model().objects.get(username=username)
-            except Exception:
+            except get_user_model().DoesNotExist:
                 return JsonResponse({'status':f'Username "{username}" did not match any user.'},status=400)           
             
             last_post = loguser.last_post
@@ -207,7 +205,7 @@ class createcomment(APIView): #Creates a new comment on a post
 
         try:
             post = Post.objects.get(id=postid)
-        except Exception:
+        except Post.DoesNotExist:
             return JsonResponse({'status':'Id does not match any post.'}, status=400)
 
         if content:
@@ -228,8 +226,7 @@ class createcomment(APIView): #Creates a new comment on a post
 
                 return JsonResponse({'status':'Comment Created Successfully.'}, status=201)
 
-            except Exception as e:
-                print(e)
+            except ValueError:
                 return JsonResponse({'status':'Failed to Create Comment.'}, status=500)
         
         else:
@@ -248,5 +245,5 @@ class deletecomment(APIView): #Deletes a comment
             comment.delete()
             return JsonResponse({'status':'Comment Deleted Successfully.'}, status=200)
 
-        except Exception:
+        except Comment.DoesNotExist:
             return JsonResponse({'status':f'Id "{commentid}" does not match any comment from user "{user}".'}, status=400)

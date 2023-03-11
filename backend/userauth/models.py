@@ -27,8 +27,9 @@ class User(AbstractUser):     #Custom user model
             try:
                 value.name = f'{createToken(15)}.{value.name.split(".")[1]}'  #Changes its name to an alphanumeric token
             
-            except Exception as e:
-                print('Exception on userauth.models.User.__setattr__: ',e)
+            except IndexError as e:
+                print(e)
+
         object.__setattr__(self, attr, value)   
         
 
