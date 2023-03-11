@@ -20,13 +20,23 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
     def get_following(self,user):
         list = []
         for user_ in user.follows.all():
-            list.append(user_.username)
+            profileimg = user_.profileimg.name
+            url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+            list.append({
+                'username':user_.username,
+                'profileimg':url,
+                })
         return list
     
     def get_followers(self,user):
         list = []
         for user_ in get_user_model().objects.filter(follows=user.id):
-            list.append(user_.username)
+            profileimg = user_.profileimg.name
+            url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+            list.append({
+                'username':user_.username,
+                'profileimg':url,
+                })
         return list
 
     class Meta:  
