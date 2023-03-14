@@ -152,9 +152,9 @@ class getpost(APIView): #Returns posts from a user profile or from the users he 
             if not qs:
                 return JsonResponse({'status':f'Failed to get posts with id less than {last_post} for user "{loguser}".'},status=404)
             
-            response = {}
+            response = []
             for n,post in enumerate(qs):
-                response[str(n)] = PostSerializer(post).data
+                response.append(PostSerializer(post).data)
 
             loguser.last_post = post.id
             loguser.save()
@@ -187,12 +187,12 @@ class getcomment(APIView): #Returns comments from a post
             if last_comment >= len(Comment.objects.filter(post=id)):
                 return JsonResponse({'status':f'There are no more available comments for post {id}.'},status=404)
 
-        response = {}
+        response = []
         for n,comment in enumerate(qs):
-            response[str(n)] = CommentSerializer(comment).data
+            response.append(CommentSerializer(comment).data)
         loguser.last_comment = comment.id
         loguser.save()
-        return JsonResponse(response)
+        return JsonResponse(response,safe=False,status=200)
 
 
 class createcomment(APIView): #Creates a new comment on a post 
