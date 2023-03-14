@@ -7,6 +7,10 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
     author = serializers.SerializerMethodField()
     files = serializers.SerializerMethodField()
     topcomment = serializers.SerializerMethodField()
+    comment_amount = serializers.SerializerMethodField()
+
+    def get_comment_amount(self,post):
+        return Post.get_comment_amount(post)
 
     def get_topcomment(self,post):
         topcomment = Post.get_top_comment(post)
@@ -50,6 +54,7 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
                 'likes',
                 'files',
                 'topcomment',
+                'comment_amount',
                     ]
 
 

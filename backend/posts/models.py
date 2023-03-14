@@ -9,7 +9,7 @@ class Post(models.Model): #Model for user posts
     content = models.TextField(max_length=200)
     likes = models.ManyToManyField(get_user_model(),symmetrical=False,blank=True,related_name='likes')
 
-    def get_top_comment(post):
+    def get_top_comment(post): #Returns the most relevant comment from a post
         comments = Comment.objects.filter(post=post.id)
         toplikes=0
         topcomment=None
@@ -27,6 +27,9 @@ class Post(models.Model): #Model for user posts
             return topcomment
         elif comments.exists():
             return comments.order_by('-creation_time')[0]
+    
+    def get_comment_amount(post): #Returns the number of comments a post has
+        return len(Comment.objects.filter(post=post.id))
 
 class Comment(models.Model):
     user = models.ForeignKey(get_user_model() , on_delete=models.CASCADE)
