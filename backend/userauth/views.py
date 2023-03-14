@@ -1,3 +1,4 @@
+import re
 from django.http import JsonResponse
 from .models import Emails 
 from .serializers import UserSerializer, ProfileSerializer
@@ -24,13 +25,13 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
 from .tokens import account_activation_token
 
-
-
 import os
-
 from backend import settings 
 
-
+def is_email(string):
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+    obj = re.fullmatch(regex,string)
+    return True if obj is not None else False
 
 def getdatetime(date): #Returns a datetime object from a date in a string ('YYYY.MM.DD')
     try:
@@ -64,22 +65,20 @@ def ping(request):   #Works to validate the csrf token when given a post request
 
 @require_POST    #Logs in an user and returns JWT tokens.
 def login(request):
-    username = request.POST.get('username',False)
-    email = request.POST.get('email',False)
+    id = request.POST.get('id',False)
     password = request.POST.get('password',False)
-    
-    def getuser(username):
-        try:
-            return get_user_model().objects.get(username=username)
-        except get_user_model().DoesNotExist:
-            return None
-    if email:
-        try:
-            user = get_user_model().objects.get(email=email)
-        except get_user_model().DoesNotExist:
-            user = getuser(username)
-    elif username:
-        user = getuser(username)
+    user = None
+    if id:
+        if is_email(id):
+            try:
+                user = get_user_model().objects.get(email=id)
+            except get_user_model().DoesNotExist as e:
+                print(e)
+        else:
+            try:
+                user = get_user_model().objects.get(username=id)
+            except get_user_model().DoesNotExist as e:
+                print(e)
     
     #If the credentials match a valid user and the password is correct
     if user and user.check_password(raw_password=password):
@@ -110,8 +109,8 @@ def register(request):       #Creates a new user with the given data and sends c
     try: #Verifies if the account already exists and requires email confirmation
         if get_user_model().objects.get(username=data['username'],email=data['email']).is_active == 0: 
             return JsonResponse({'status':'Account already created. Email not confirmed.'}, status=403)
-    except get_user_model().DoesNotExist:
-        pass 
+    except get_user_model().DoesNotExist as e: 
+        print(e)
         
 
     response=[] #Verifies if the credentials are already in use
