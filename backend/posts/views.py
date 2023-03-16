@@ -4,6 +4,7 @@ from .serializers import PostSerializer, CommentSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
+from backend.settings import ELEMENTS_PER_SCROLL, FILES_PER_POST, FILES_PER_COMMENT
 
 
 
@@ -16,7 +17,7 @@ class createpost(APIView): #Creates a new post
         content = request.data.get('content',False)
         
         files = []
-        for _ in range(10):
+        for _ in range(FILES_PER_POST):
             file = request.data.get(str(_),False)
             if file:
                 files.append(file)
@@ -105,7 +106,6 @@ class getpost(APIView): #Returns posts from a user profile or from the users he 
     permission_classes = [IsAuthenticated]
 
     def get(self, request , context, username, refresh):
-        posts_per_scroll = 10
         loguser = request.user
 
         def is_false(str):
@@ -125,9 +125,9 @@ class getpost(APIView): #Returns posts from a user profile or from the users he 
             
             last_post = loguser.last_post
             if last_post:
-                qs = Post.objects.filter(user=user,id__lt=last_post).order_by('-id')[0:posts_per_scroll]
+                qs = Post.objects.filter(user=user,id__lt=last_post).order_by('-id')[0:ELEMENTS_PER_SCROLL]
             else:
-                qs = Post.objects.filter(user=user).order_by('-id')[0:posts_per_scroll]
+                qs = Post.objects.filter(user=user).order_by('-id')[0:ELEMENTS_PER_SCROLL]
 
             if not qs:
                 return JsonResponse({'status':f'Failed to get posts with id less than {last_post} from user "{user}".'},status=404)
@@ -145,9 +145,9 @@ class getpost(APIView): #Returns posts from a user profile or from the users he 
             
             last_post = loguser.last_post
             if last_post:
-                qs = Post.objects.filter(user__in=following,id__lt=last_post).order_by('-id')[0:posts_per_scroll]
+                qs = Post.objects.filter(user__in=following,id__lt=last_post).order_by('-id')[0:ELEMENTS_PER_SCROLL]
             else:
-                qs = Post.objects.filter(user__in=following).order_by('-id')[0:posts_per_scroll]
+                qs = Post.objects.filter(user__in=following).order_by('-id')[0:ELEMENTS_PER_SCROLL]
 
             if not qs:
                 return JsonResponse({'status':f'Failed to get posts with id less than {last_post} for user "{loguser}".'},status=404)
@@ -169,16 +169,15 @@ class getcomment(APIView): #Returns comments from a post
     permission_classes = [IsAuthenticated]
 
     def get(self, request , id, refresh):
-        comments_per_scroll = 10
         loguser = request.user
         if refresh != 'False':
             loguser.last_comment = 0
             loguser.save()
         last_comment = loguser.last_comment
         if last_comment:
-            qs = Comment.objects.filter(post=id,id__lt=last_comment).order_by('-id')[0:comments_per_scroll]
+            qs = Comment.objects.filter(post=id,id__lt=last_comment).order_by('-id')[0:ELEMENTS_PER_SCROLL]
         else:
-            qs = Comment.objects.filter(post=id).order_by('-id')[0:comments_per_scroll]
+            qs = Comment.objects.filter(post=id).order_by('-id')[0:ELEMENTS_PER_SCROLL]
         if not qs.exists():
             try:
                 post = Post.objects.get(id = id)
@@ -210,7 +209,7 @@ class createcomment(APIView): #Creates a new comment on a post
 
         if content:
             files = []
-            for _ in range(10):
+            for _ in range(FILES_PER_COMMENT):
                 file = request.data.get(str(_),False)
                 if file:
                     files.append(file)

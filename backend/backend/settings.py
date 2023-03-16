@@ -22,6 +22,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DOMAIN = 'http://localhost:3000'
 BACKEND_DOMAIN = 'http://localhost:8000'
 
+#getpost, getcomment
+ELEMENTS_PER_SCROLL = 10
+#createpost
+FILES_PER_POST = 10
+#createcomment
+FILES_PER_COMMENT = 10
+#userauth.models
+HOURLY_LIMIT = 3
+DAILY_LIMIT = 10
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 

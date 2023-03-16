@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 import os, datetime
 from .tokens import createToken
+from backend import settings
 from django.utils import timezone
 
 
@@ -64,15 +65,12 @@ class Emails(models.Model): #Keeps a log of all the emails sent to avoid spammin
         Emails.objects.filter(time__lt=Emails.last_day()).delete()
     
     def spam(user,subject):
-        HOURLY_LIMIT = 3
-        DAILY_LIMIT = 10
-
         Emails.reset(user)
 
         last_hour_emails = len(Emails.objects.filter(user=user,subject=subject,time__gt=Emails.last_hour()))
         last_day_emails = len(Emails.objects.filter(user=user,subject=subject,time__gt=Emails.last_day()))
 
-        if last_hour_emails>HOURLY_LIMIT or last_day_emails>DAILY_LIMIT:
+        if last_hour_emails>settings.HOURLY_LIMIT or last_day_emails>settings.DAILY_LIMIT:
             return True
         else:
             return False
