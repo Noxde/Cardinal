@@ -24,6 +24,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
 from .tokens import account_activation_token
+from email_validator import validate_email, EmailNotValidError
 
 import os
 from backend import settings 
@@ -105,6 +106,13 @@ def register(request):       #Creates a new user with the given data and sends c
     for key,value in data.items():
         if not value:
             return JsonResponse({'status':f'{key} missing.'}, status=400)
+    
+    #Checks if the email is valid
+    try:
+        validate_email(data['email'])
+    except EmailNotValidError as e:
+        print(str(e))
+        return JsonResponse({'status':f'Email "{data["email"]}" is not valid.'}, status=400)
     
     try: #Verifies if the account already exists and requires email confirmation
         if get_user_model().objects.get(username=data['username'],email=data['email']).is_active == 0: 

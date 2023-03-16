@@ -4,13 +4,14 @@ import os, datetime
 from .tokens import createToken
 from backend import settings
 from django.utils import timezone
+from django.core.validators import EmailValidator
 
 
 
 class User(AbstractUser):     #Custom user model
     profileimg = models.ImageField(upload_to='user/',blank=True)
     banner = models.ImageField(upload_to='user/',blank=True)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True,validators=[EmailValidator])
     about = models.TextField(max_length=1000,blank=True)
     region = models.CharField(max_length=50,blank=True)
     lang = models.CharField(max_length=50,blank=True)
