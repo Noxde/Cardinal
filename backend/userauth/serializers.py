@@ -25,9 +25,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
             list.append({
                 'username':user_.username,
                 'profileimg':url,
+                'about':user_.about,
                 })
         return list
-    
+
     def get_followers(self,user):
         list = []
         for user_ in get_user_model().objects.filter(follows=user.id):
@@ -36,6 +37,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
             list.append({
                 'username':user_.username,
                 'profileimg':url,
+                'about':user_.about,
                 })
         return list
 
