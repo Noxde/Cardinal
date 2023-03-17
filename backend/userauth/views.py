@@ -38,7 +38,7 @@ def getdatetime(date): #Returns a datetime object from a date in a string ('YYYY
     try:
         split = date.split('.')
         return datetime.datetime(int(split[0]),int(split[1]),int(split[2]))
-    except (IndexError, ValueError):
+    except (IndexError, ValueError, AttributeError):
         return None
 
 def ValidateEmail(uidb64, token): #Checks if a token sent in an email belongs to a given user
@@ -140,9 +140,9 @@ def register(request):       #Creates a new user with the given data and sends c
         if data:
             setattr(user,datafield,data)
     
-    birth_date = getdatetime(request.data.get('birth_date',False))
+    birth_date = request.data.get('birth_date',False)
     if birth_date:
-        setattr(user,'birth_date',birth_date) 
+        setattr(user,'birth_date',getdatetime(birth_date)) 
     user.date_joined = datetime.datetime.now()
 
     user.save()
@@ -186,7 +186,6 @@ class moduserinfo(APIView): #Allows to modify user data
         'about',
         'region',
         'lang',
-        'birth_date',
         'profileimg',
         'banner',
         ]
@@ -202,9 +201,9 @@ class moduserinfo(APIView): #Allows to modify user data
                     setattr(user,datafield,data)
                     modifiedfields.append(datafield)
 
-        birth_date = getdatetime(request.data.get('birth_date',False))
+        birth_date = request.data.get('birth_date',False)
         if birth_date:
-            setattr(user,'birth_date',birth_date) 
+            setattr(user,'birth_date',getdatetime(birth_date)) 
             modifiedfields.append('birth_date')
         user.save()
         if modifiedfields:
