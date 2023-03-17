@@ -1,13 +1,18 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from backend.settings import BACKEND_DOMAIN,MEDIA_URL 
+from posts.models import Post
 
 class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for the custom user model
     following = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
     profileimg = serializers.SerializerMethodField()
     banner = serializers.SerializerMethodField()
+    post_amount = serializers.SerializerMethodField()
 
+    def get_post_amount(self,user):
+        return len(Post.objects.filter(user=user.id))
+    
     def get_banner(self,user):
         if user.banner:
             return BACKEND_DOMAIN+MEDIA_URL+user.banner.name
@@ -58,7 +63,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
                   'banner',
                   'followers',
                   'following',
-
+                  'post_amount',
                 ]
 
 class ProfileSerializer(UserSerializer): #Serializer for public profiles
@@ -66,6 +71,7 @@ class ProfileSerializer(UserSerializer): #Serializer for public profiles
     followers = serializers.SerializerMethodField()
     profileimg = serializers.SerializerMethodField()
     banner = serializers.SerializerMethodField()
+    post_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
@@ -76,4 +82,5 @@ class ProfileSerializer(UserSerializer): #Serializer for public profiles
                     'banner',
                     'followers',
                     'following',
+                    'post_amount',
                 ]
