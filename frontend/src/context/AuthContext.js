@@ -50,14 +50,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const loginUser = async (userInfo) => {
-    const { login, password } = userInfo;
+    const { id, password } = userInfo;
     const csrfToken = await getCsrf();
 
     const payload = {
-      email: login.includes("@") ? login : "",
-      username: !login.includes("@") ? login : "",
+      id,
       password,
     };
+
+    console.log(payload);
 
     const res = await instance.post("/login/", qs.stringify(payload), {
       headers: {

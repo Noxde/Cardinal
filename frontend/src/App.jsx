@@ -1,9 +1,4 @@
-import {
-  Routes,
-  Route,
-  BrowserRouter as Router,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
 import NotFound from "./components/NotFound";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
@@ -15,7 +10,6 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import Layout from "./components/Layout";
 
 import { AuthProvider } from "./context/AuthContext";
-import jwtDecode from "jwt-decode";
 
 const queryClient = new QueryClient();
 
@@ -31,8 +25,14 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/profile/" element={<Profile />} />
-              <Route path="/profile/:username" element={<Profile />} />
+              <Route
+                path="/profile/"
+                element={<Profile key={"userProfile"} />}
+              />
+              <Route
+                path="/profile/:username"
+                element={<Profile key={window.location.pathname} />}
+              />
             </Route>
           </Routes>
           {/* <Route element={<PrivateRoutes />}></Route> */}

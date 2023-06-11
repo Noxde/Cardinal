@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 
 export const LoginSchema = Yup.object({
-  login: Yup.string().required("Required."),
+  id: Yup.string().required("Required."),
   password: Yup.string()
     .required("Enter your account password.")
     .matches(/^(?=.*?[A-Z])/, "Password includes an uppercase letter.")

@@ -1,44 +1,78 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
+import NewPost from "./NewPost";
 
 import { AiFillHome } from "react-icons/ai";
 import { GoSearch } from "react-icons/go";
+import { CgProfile } from "react-icons/cg";
+import { HiEllipsisHorizontal } from "react-icons/hi2";
 import { TfiEmail, TfiPencil } from "react-icons/tfi";
 
 function Layout() {
   const { user } = useContext(AuthContext);
+  const [newPost, setNewPost] = useState(false);
   let iconSize = "30px";
 
+  useEffect(() => {
+    localStorage.setItem("user", JSON.stringify(user));
+  }, [user]);
+
+  function handlePost() {
+    setNewPost(true);
+    document.body.style.overflow = "hidden";
+  }
+
   return (
-    <div className="lg:grid grid-cols-[1.5fr,5fr,2.5fr] lg:max-w-[1900px] lg:mx-auto">
+    <div className="lg:grid grid-cols-[2fr,5fr,2.5fr] lg:max-w-[1900px] lg:mx-auto">
       <div className="hidden lg:flex justify-center h-full bg-white border-r border-[#e6e6e6] z-10">
-        <div>
-          <div className="sticky top-10 h-40">
-            <img src="/logo.svg" width={"70px"} />
-            <nav className="text-2xl Gelion-Medium mt-10">
-              <ul className="space-y-4">
+        <div className="sticky h-fit p-10 pr-5 top-0 flex-1">
+          <img src="/logo.svg" width={"50px"} />
+          <nav className="text-2xl Gelion-Medium mt-10">
+            <ul className="space-y-4">
+              <li>
+                <Link to={"/"}>
+                  <AiFillHome className="inline mr-4" size={"25px"} />
+                  Home
+                </Link>
+              </li>
+              {user && (
+                <>
+                  <li>
+                    <Link>
+                      <TfiEmail className="inline mr-4" size={"25px"} />
+                      Messages
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/profile">
+                      <CgProfile className="inline mr-4" size={"25px"} />
+                      Profile
+                    </Link>
+                  </li>
+                </>
+              )}
+              <li>
+                <Link>
+                  <HiEllipsisHorizontal className="inline mr-4" size={"25px"} />
+                  More
+                </Link>
+              </li>
+              {user && (
                 <li>
-                  <Link to={"/"}>Home</Link>
+                  <button
+                    onClick={handlePost}
+                    className="bg-[#4558ff] text-white py-2 rounded-full w-full"
+                  >
+                    Post
+                  </button>
                 </li>
-                {user && (
-                  <>
-                    <li>
-                      <Link>Messages</Link>
-                    </li>
-                    <li>
-                      <Link to="/profile">Profile</Link>
-                    </li>
-                  </>
-                )}
-                <li>
-                  <Link>More</Link>
-                </li>
-              </ul>
-            </nav>
-          </div>
+              )}
+            </ul>
+          </nav>
         </div>
       </div>
+      {newPost && <NewPost setNewPost={setNewPost} />}
       <Outlet />
       <div className="hidden lg:block h-full bg-white border-l border-[#e6e6e6] z-30"></div>
       <div className="lg:hidden flex py-2 px-1 items-center justify-around fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full w-[90%] bg-white shadow-[0px_4px_30px_-5px_rgba(0,0,0,0.2)]">
@@ -48,13 +82,27 @@ function Layout() {
         <button>
           <GoSearch size={iconSize} color="#908f94" />
         </button>
-        <button className="flex items-center justify-center relative rounded-full -mt-6 -top-3 bg-[#3e4fe5] w-[70px] aspect-[1/1]">
+
+        <button
+          onClick={
+            user ? handlePost : () => (window.location.pathname = "login")
+          }
+          className="flex items-center justify-center relative rounded-full -mt-6 -top-3 bg-[#3e4fe5] w-[70px] aspect-[1/1]"
+        >
           <TfiPencil size={iconSize} color="white" />
         </button>
         <button>
           <TfiEmail size={iconSize} color="#908f94" />
         </button>
-        <button>
+        <div className="relative group/profile">
+          <div className="absolute p-4 z-10 bottom-full right-1/2 translate-x-1/2 bg-white hidden group-hover/profile:block">
+            <ul>
+              <li>
+                <Link to={"profile"}>Profile</Link>
+              </li>
+              <li>Manage Account</li>
+            </ul>
+          </div>
           <img
             src={
               user
@@ -63,9 +111,9 @@ function Layout() {
             }
             width={iconSize}
             alt="profile placeholder"
-            className="rounded-full aspect-square"
+            className="rounded-full object-cover aspect-square"
           />
-        </button>
+        </div>
       </div>
     </div>
   );

@@ -4,21 +4,26 @@ import { useQuery } from "react-query";
 import instance from "../utils/Axios";
 import useAxios from "../utils/useAxios";
 import AuthContext from "../context/AuthContext";
+import { useInView } from "react-intersection-observer";
+
+import qs from "qs";
 
 import NotFound from "./NotFound";
 import Loading from "./Loading";
 import Post from "./Post";
 
-import Posts from "../utils/posts";
+// import Posts from "../utils/posts";
 import EditProfile from "./EditProfile";
 
 function Profile() {
+  const api = useAxios();
   const { user, setUser } = useContext(AuthContext);
   const [userProfile, setUserProfile] = useState(null);
   const [editProfile, setEditProfile] = useState(false);
+  const [isIncomplete, setIsIncomplete] = useState(true);
   const isLoggedProfile = user?.username !== userProfile?.username;
 
-  const [posts, setPosts] = useState(Posts); // No posts from the backend yet
+  const [posts, setPosts] = useState([]); // No posts from the backend yet
   const [isFollowed, setIsFollowed] = useState(false);
 
   const { username } = useParams();
@@ -38,6 +43,12 @@ function Profile() {
     };
   }, [userProfile]);
 
+  const [ref, inView, entry] = useInView({
+    root: null,
+    rootMargin: "150px",
+    threshold: 0,
+  });
+
   const { isLoading, isError, error } = useQuery(
     "userProfile",
     () => instance.get(`/getpublicprofile/${username}/`),
@@ -48,9 +59,49 @@ function Profile() {
       cacheTime: 1000,
       onSuccess: ({ data: userInfo }) => {
         setUserProfile(userInfo);
+        setIsFollowed(
+          userInfo.followers.find((x) => x.username === user.username)
+            ? true
+            : false
+        );
       },
     }
   );
+
+  // Get user posts
+  const { postsLoading, postsIsError, postsError } = useQuery(
+    "userPosts",
+    () => api.get(`getpost/profile/${username || user.username}/True/`),
+    {
+      enabled: (!username && user) || (username && user) ? true : false,
+      retry: false,
+      refetchOnWindowFocus: false,
+      cacheTime: 1000,
+      onSuccess: ({ data: userPosts }) => {
+        setPosts(Object.entries(userPosts).map((x) => x[1]));
+      },
+    }
+  );
+  // Infinite scroll
+  useEffect(() => {
+    async function fetchMore() {
+      if (!inView || !isIncomplete) return;
+
+      const res = await api
+        .get(`getpost/profile/${username || user.username}/False/`)
+        .catch((err) => {
+          return setIsIncomplete(false);
+        });
+
+      if (res?.data) {
+        setPosts((prev) => [
+          ...prev,
+          ...Object.entries(res.data).map((x) => x[1]),
+        ]);
+      }
+    }
+    fetchMore();
+  }, [inView]);
 
   if (user === null && !username) {
     return <Navigate to={"/login"} />;
@@ -100,7 +151,34 @@ function Profile() {
               </span>
               {isLoggedProfile ? (
                 <button
-                  onClick={() => setIsFollowed((prev) => !prev)}
+                  onClick={async () => {
+                    await api.post(
+                      "follows/",
+                      qs.stringify({
+                        action: isFollowed ? "remove" : "add",
+                        usernames: username,
+                      })
+                    );
+                    //Update states
+                    setIsFollowed((prev) => !prev);
+                    setUserProfile({
+                      ...userProfile,
+                      followers: isFollowed
+                        ? userProfile.followers.filter(
+                            (x) => x !== user.username
+                          )
+                        : [...userProfile.followers, user.username],
+                    });
+
+                    setUser({
+                      ...user,
+                      following: isFollowed
+                        ? user.following.filter(
+                            (x) => x !== userProfile.username
+                          )
+                        : [...user.following, username],
+                    });
+                  }}
                   className="Gelion-Medium bg-[#4558ff] text-white px-6 py-1 rounded-full"
                 >
                   {isFollowed ? "Following" : "Follow"}
@@ -120,7 +198,9 @@ function Profile() {
 
             <div className="info flex space-x-6">
               <div className="flex flex-col text-center justify-center">
-                <span className="Gelion-Medium">{posts.length}</span>
+                <span className="Gelion-Medium">
+                  {userProfile?.post_amount}
+                </span>
                 Posts
               </div>
               <div className="followers flex flex-col text-center justify-center">
@@ -154,13 +234,9 @@ function Profile() {
           {posts.length ? (
             <div className="posts pb-28">
               {posts.map((post) => (
-                <Post
-                  key={Math.random()}
-                  author={post.author}
-                  content={post.content}
-                  attachment={post.attachment}
-                />
+                <Post setPosts={setPosts} key={post.id} post={post} />
               ))}
+              <div ref={ref} className="h-0 w-0"></div>
             </div>
           ) : (
             <div className="text-center bg-white Gelion-Medium">
@@ -168,10 +244,6 @@ function Profile() {
             </div>
           )}
         </div>
-        {/* bottom nav */
-        /**TODO:
-         * Move out of profile component
-         */}
       </div>
     </>
   );

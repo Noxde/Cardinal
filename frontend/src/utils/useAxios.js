@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import jwtDecode from "jwt-decode";
 
 const useAxios = () => {
-  const { authTokens, setUser, setAuthTokens } = useContext(AuthContext);
+  const { authTokens, user, setUser, setAuthTokens } = useContext(AuthContext);
   const axiosInstance = axios.create({
     baseURL: "http://localhost:8000",
     headers: {
@@ -15,8 +15,8 @@ const useAxios = () => {
   });
 
   axiosInstance.interceptors.request.use(async (req) => {
-    const user = jwtDecode(authTokens.access);
-    const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
+    const userToken = jwtDecode(authTokens.access);
+    const isExpired = dayjs.unix(userToken.exp).diff(dayjs()) < 1;
 
     if (!isExpired) return req;
 

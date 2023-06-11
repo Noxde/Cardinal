@@ -20,13 +20,13 @@ function Login() {
 
   useEffect(() => {
     if (location.state) {
-      formik.values.login = location.state.username;
+      formik.values.id = location.state.username;
     }
-  });
+  }, []);
 
   const formik = useFormik({
     initialValues: {
-      login: "",
+      id: "",
       password: "",
       keepLogged: "",
     },
@@ -40,7 +40,7 @@ function Login() {
 
       try {
         await loginUser({
-          login: values.login,
+          id: values.id,
           password: values.password,
           keepLogged: values.keepLogged,
         });
@@ -124,22 +124,22 @@ function Login() {
             className="text-[#131313] max-w-lg mx-auto"
           >
             <ToastContainer theme="colored" />
-            <label className="block Gelion-Semi-Bold" htmlFor="login">
+            <label className="block Gelion-Semi-Bold" htmlFor="id">
               Email/Username
             </label>
             <input
               className={`w-full rounded-lg border-[#9C9D9F] mt-2 ${
-                formik.touched.login && formik.errors.login ? "input-error" : ""
+                formik.touched.id && formik.errors.id ? "input-error" : ""
               }`}
               type="text"
-              name="login"
+              name="id"
               placeholder="Enter your user or email"
-              value={formik.values.login}
+              value={formik.values.id}
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
             />
-            {formik.touched.login && formik.errors.login && (
-              <p className="text-[#f14141]">{formik.errors.login}</p>
+            {formik.touched.id && formik.errors.id && (
+              <p className="text-[#f14141]">{formik.errors.id}</p>
             )}
 
             <label className="block Gelion-Semi-Bold  mt-5" htmlFor="password">
