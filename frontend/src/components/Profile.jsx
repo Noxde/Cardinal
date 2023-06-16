@@ -165,7 +165,9 @@ function Profile() {
                       ...userProfile,
                       followers: isFollowed
                         ? userProfile.followers.filter(
-                            (x) => x !== user.username
+                            (x) =>
+                              x.username !== user.username && // removes client from followers
+                              x !== user.username
                           )
                         : [...userProfile.followers, user.username],
                     });
@@ -174,7 +176,9 @@ function Profile() {
                       ...user,
                       following: isFollowed
                         ? user.following.filter(
-                            (x) => x !== userProfile.username
+                            (x) =>
+                              x.username !== userProfile.username && // removes user from following
+                              x !== userProfile.username
                           )
                         : [...user.following, username],
                     });
