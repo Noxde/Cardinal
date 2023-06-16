@@ -64,7 +64,7 @@ function Post({
   );
 
   async function addComment() {
-    if (!newComment) return;
+    if (!newComment.trim()) return;
 
     await api.post(
       "createcomment/",
