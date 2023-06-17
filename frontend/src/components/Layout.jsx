@@ -8,9 +8,10 @@ import { GoSearch } from "react-icons/go";
 import { CgProfile } from "react-icons/cg";
 import { HiEllipsisHorizontal } from "react-icons/hi2";
 import { TfiEmail, TfiPencil } from "react-icons/tfi";
+import { MdLogout } from "react-icons/md";
 
 function Layout() {
-  const { user } = useContext(AuthContext);
+  const { user, logoutUser } = useContext(AuthContext);
   const [newPost, setNewPost] = useState(false);
   let iconSize = "30px";
 
@@ -26,7 +27,7 @@ function Layout() {
   return (
     <div className="lg:grid grid-cols-[2fr,5fr,2.5fr] lg:max-w-[1900px] lg:mx-auto">
       <div className="hidden lg:flex justify-center h-full bg-white border-r border-[#e6e6e6] z-10">
-        <div className="sticky h-fit p-10 pr-5 top-0 flex-1">
+        <div className="sticky flex flex-col h-screen p-10 pr-5 top-0 flex-1">
           <img src="/logo.svg" width={"50px"} />
           <nav className="text-2xl Gelion-Medium mt-10">
             <ul className="space-y-4">
@@ -70,6 +71,25 @@ function Layout() {
               )}
             </ul>
           </nav>
+          <div className="spacer flex-1"></div>
+          {user && (
+            <button
+              onClick={() => {
+                logoutUser();
+              }}
+              className="flex items-center hover:bg-gray-100 px-4 py-[0.5rem] rounded-full transition-all "
+            >
+              <img
+                src={user.profileimg}
+                width="40px"
+                alt=""
+                className="rounded-full object-cover mr-4 aspect-square"
+              />
+              <span className="Gelion-Medium">{user.username}</span>
+
+              <MdLogout className="ml-2" size="20px" color="#C11212" />
+            </button>
+          )}
         </div>
       </div>
       {newPost && <NewPost setNewPost={setNewPost} />}
