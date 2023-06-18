@@ -93,6 +93,9 @@ function Post({
     await api.post("/delete/", {
       id,
     });
+    // Update amount of posts in localstorage
+    user.post_amount -= 1;
+    window.localStorage.setItem("user", JSON.stringify(user));
 
     setPosts((prev) => prev.filter((x) => x.id !== id));
     // window.location.reload();

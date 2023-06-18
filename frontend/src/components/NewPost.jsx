@@ -18,6 +18,9 @@ function NewPost({ setNewPost }) {
         "content-type": "multipart/form-data",
       },
     });
+    // Update amount of posts in localstorage
+    user.post_amount += 1;
+    window.localStorage.setItem("user", JSON.stringify(user));
     window.location.reload();
   }
 
