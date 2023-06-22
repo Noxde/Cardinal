@@ -51,6 +51,8 @@ else:
 INSTALLED_APPS = [
     'userauth',
     'posts',
+    'chats',
+    'daphne',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -60,6 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'django_extensions',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -121,6 +124,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+
+ASGI_APPLICATION = "backend.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 #Email config
 EMAIL_HOST = 'smtp.gmail.com'
