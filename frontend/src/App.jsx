@@ -1,11 +1,11 @@
 import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
-import NotFound from "./components/NotFound";
-import Home from "./components/Home";
-import Profile from "./components/Profile";
-import Login from "./components/Login";
-import SignUp from "./components/SignUp";
+import NotFound from "./pages/404/index";
+import Home from "./pages/Home/index";
+import Profile from "./pages/Profile/index";
+import Login from "./pages/Login/index";
+import SignUp from "./pages/SignUp/index";
 // import PrivateRoutes from "./utils/PrivateRoutes";
-import ConfirmedEmail from "./components/ConfirmedEmail";
+import ConfirmedEmail from "./pages/ConfirmedEmail/index";
 import { QueryClient, QueryClientProvider } from "react-query";
 import Layout from "./components/Layout";
 
@@ -26,16 +26,15 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
               <Route
-                path="/profile/"
-                element={<Profile key={"userProfile"} />}
-              />
-              <Route
                 path="/profile/:username"
                 element={<Profile key={window.location.pathname} />}
               />
+              <Route
+                path="/profile/"
+                element={<Profile key={"userProfile"} />}
+              />
             </Route>
           </Routes>
-          {/* <Route element={<PrivateRoutes />}></Route> */}
         </QueryClientProvider>
       </AuthProvider>
     </Router>
