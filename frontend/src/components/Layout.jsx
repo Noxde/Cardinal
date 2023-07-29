@@ -80,7 +80,7 @@ function Layout() {
               className="flex items-center hover:bg-gray-100 px-4 py-[0.5rem] rounded-full transition-all "
             >
               <img
-                src={user.profileimg}
+                src={user.profileimg || "/assets/profile_placeholder.png"}
                 width="40px"
                 alt=""
                 className="rounded-full object-cover mr-4 aspect-square"
@@ -124,11 +124,7 @@ function Layout() {
             </ul>
           </div>
           <img
-            src={
-              user
-                ? user.profileimg || "/assets/profile_placeholder.png"
-                : "/assets/profile_placeholder.png"
-            }
+            src={user?.profileimg || "/assets/profile_placeholder.png"}
             width={iconSize}
             alt="profile placeholder"
             className="rounded-full object-cover aspect-square"
