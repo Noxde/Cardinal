@@ -4,7 +4,7 @@ from rest_framework_simplejwt.authentication  import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
-
+from userauth.tokens import createToken
 
 class ChatConsumer(AsyncWebsocketConsumer,JWTAuthentication):
     async def connect(self):
@@ -16,18 +16,18 @@ class ChatConsumer(AsyncWebsocketConsumer,JWTAuthentication):
                 jwttoken = headers[i][1].decode() 
             i+=1
 
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.room_group_name = "chat_%s" % self.room_name
-
         try:
             validatedtoken = self.get_validated_token(jwttoken)
             user = await sync_to_async(self.get_user)(validatedtoken)
+            self.room_name = user.username
+            self.room_group_name = self.room_name
 
             # Join room group
             await self.channel_layer.group_add(self.room_group_name, self.channel_name)
             await self.accept()
         except InvalidToken:
-            pass
+            self.room_name = createToken(7)
+            self.room_group_name = self.room_name
         
     async def disconnect(self, close_code):
         # Leave room group
