@@ -22,6 +22,8 @@ function Login() {
   useEffect(() => {
     if (location.state) {
       formik.values.id = location.state.username;
+      document.querySelector("input[name='id']").value =
+        location.state.username;
     }
   }, []);
 
