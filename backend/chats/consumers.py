@@ -3,8 +3,10 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from rest_framework_simplejwt.authentication  import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
 from asgiref.sync import sync_to_async
+from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from userauth.tokens import createToken
+from .models import Message
 
 class ChatConsumer(AsyncWebsocketConsumer,JWTAuthentication):
     async def connect(self):
@@ -39,10 +41,17 @@ class ChatConsumer(AsyncWebsocketConsumer,JWTAuthentication):
         text_data_json["type"] = "chat_message"
         text_data_json["sender"] = self.user.username
 
-        # Send message to room group
-        await self.channel_layer.group_send(
-            text_data_json["receiver"], text_data_json
-        )
+        try:
+            # Saves the message in the database
+            receiver = await database_sync_to_async(self.user_model.objects.get)(username=text_data_json["receiver"])
+            await database_sync_to_async(Message.objects.create)(content=text_data_json["message"],sender=self.user,receiver=receiver)
+
+            # Send message to room group
+            await self.channel_layer.group_send(
+                receiver.username, text_data_json
+            )
+        except self.user_model.DoesNotExist:
+            pass
 
     # Receive message from room group
     async def chat_message(self, event):
