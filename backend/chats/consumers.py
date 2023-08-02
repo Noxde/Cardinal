@@ -18,8 +18,8 @@ class ChatConsumer(AsyncWebsocketConsumer,JWTAuthentication):
 
         try:
             validatedtoken = self.get_validated_token(jwttoken)
-            user = await sync_to_async(self.get_user)(validatedtoken)
-            self.room_name = user.username
+            self.user = await sync_to_async(self.get_user)(validatedtoken)
+            self.room_name = self.user.username
             self.room_group_name = self.room_name
 
             # Join room group
@@ -37,6 +37,7 @@ class ChatConsumer(AsyncWebsocketConsumer,JWTAuthentication):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         text_data_json["type"] = "chat_message"
+        text_data_json["sender"] = self.user.username
 
         # Send message to room group
         await self.channel_layer.group_send(
@@ -45,7 +46,6 @@ class ChatConsumer(AsyncWebsocketConsumer,JWTAuthentication):
 
     # Receive message from room group
     async def chat_message(self, event):
-        message = event["message"]
 
         # Send message to WebSocket
-        await self.send(text_data=json.dumps({"message": message}))
+        await self.send(text_data=json.dumps(event))
