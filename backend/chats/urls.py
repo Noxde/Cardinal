@@ -5,4 +5,5 @@ from . import views
 
 urlpatterns = [
     path('getchat/<str:chat>/<int:page>/<int:limit>/',view=views.getchat.as_view(),name='getchat'),
+    path('createchat/<str:username_two>/',view=views.createchat.as_view(),name='createchat'),
 ]

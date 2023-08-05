@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Message
+from .models import Message, Chat
 from .serializers import MessageSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -32,3 +32,28 @@ class getchat(APIView): #Returns the messages from a chat
             response.append(MessageSerializer(message).data)
         
         return JsonResponse(response,safe=False,status=200)
+    
+class createchat(APIView): #Creates a Chat object
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, username_two):
+        user_one = request.user
+        self.user_model = get_user_model()
+
+        try:
+            user_two = self.user_model.objects.get(username=username_two)
+            chat = Chat.objects.filter(Q(user_one=user_one) | Q(user_one=user_two))
+            chat = chat.get(Q(user_two=user_one) | Q(user_two=user_two))
+
+        except (self.user_model.DoesNotExist, Chat.DoesNotExist, Chat.MultipleObjectsReturned) as error:
+            if isinstance(error, self.user_model.DoesNotExist):
+                return JsonResponse({'status':f'Username "{username_two}" does not match any user.'},status=400)
+            
+            elif isinstance(error, Chat.DoesNotExist):
+                Chat.objects.create(user_one=user_one,user_two=user_two)
+                return JsonResponse({'status':'Chat created successfully.'},status=201)
+            
+            elif isinstance(error, Chat.MultipleObjectsReturned):
+                return JsonResponse({'status':'MultipleObjectsReturned, Chat creation avoided.'},status=200)
+            
+        return JsonResponse({'status':'Chat already exists.'},status=200)
