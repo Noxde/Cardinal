@@ -1,10 +1,11 @@
 from django.urls import path
 from . import views
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
 
 
 urlpatterns = [
     path('login/token/refresh/', TokenRefreshView.as_view(), name='login_token_refresh'),
+    path('logout/', TokenBlacklistView.as_view(), name='logout'),
     path('getuserinfo/', views.getuserinfo.as_view(), name='getuserinfo'),
     path('getpublicprofile/<slug:username>/', views.getpublicprofile, name='getpublicprofile'),
     path('moduserinfo/', views.moduserinfo.as_view(), name='moduserinfo'),
