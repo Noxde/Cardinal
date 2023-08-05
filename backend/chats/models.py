@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+class Chat(models.Model): #Model for open chats, avoids searching in Message model
+
+    user_one = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,related_name="user_one")
+    user_two = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,related_name="user_two")
+
 class Message(models.Model): #Model for chat messages
 
     content = models.TextField(max_length=300)
