@@ -9,7 +9,7 @@ from django.core.validators import EmailValidator
 
 
 class User(AbstractUser):     #Custom user model
-    profileimg = models.ImageField(upload_to='user/',blank=True)
+    profileimg = models.ImageField(upload_to='user/',blank=True,default='profile_placeholder.png')
     banner = models.ImageField(upload_to='user/',blank=True)
     email = models.EmailField(unique=True,validators=[EmailValidator])
     about = models.TextField(max_length=1000,blank=True)

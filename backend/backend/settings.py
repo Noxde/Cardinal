@@ -63,11 +63,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     'channels',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
-
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
