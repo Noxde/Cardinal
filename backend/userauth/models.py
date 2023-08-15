@@ -34,10 +34,15 @@ class User(AbstractUser):     #Custom user model
 
         object.__setattr__(self, attr, value)   
         
-
     def getfields():          #Returns all the names of the fields in User
  
         return [field.name for field in User._meta.get_fields()]
+    
+    def delete(self, *args, **kwargs): #Deletes an user object, including related files
+
+        self.profileimg.delete(save=False)
+        self.banner.delete(save=False)
+        super().delete(*args, **kwargs)
 
 
 class Emails(models.Model): #Keeps a log of all the emails sent to avoid spamming
