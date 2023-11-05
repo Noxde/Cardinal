@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from backend.settings import BACKEND_DOMAIN,MEDIA_URL 
+from backend.settings import NGINX_DOMAIN,MEDIA_URL 
 from posts.models import Post
 
 class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for the custom user model
@@ -15,18 +15,18 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
     
     def get_banner(self,user):
         if user.banner:
-            return BACKEND_DOMAIN+MEDIA_URL+user.banner.name
+            return NGINX_DOMAIN+MEDIA_URL+user.banner.name
         
     def get_profileimg(self,user):
         if user.profileimg:
-            return BACKEND_DOMAIN+MEDIA_URL+user.profileimg.name
+            return NGINX_DOMAIN+MEDIA_URL+user.profileimg.name
 
 
     def get_following(self,user):
         list = []
         for user_ in user.follows.all():
             profileimg = user_.profileimg.name
-            url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+            url = NGINX_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
             list.append({
                 'username':user_.username,
                 'profileimg':url,
@@ -38,7 +38,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer): #Serializer for th
         list = []
         for user_ in get_user_model().objects.filter(follows=user.id):
             profileimg = user_.profileimg.name
-            url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+            url = NGINX_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
             list.append({
                 'username':user_.username,
                 'profileimg':url,

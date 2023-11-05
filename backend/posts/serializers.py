@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from backend.settings import BACKEND_DOMAIN,MEDIA_URL 
+from backend.settings import NGINX_DOMAIN,MEDIA_URL 
 from .models import Post, PostFiles, CommentFiles, Comment
 
 class PostSerializer(serializers.ModelSerializer): #Serializer for the Post model
@@ -21,7 +21,7 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
         list = []
         for user_ in post.likes.all():
             profileimg = user_.profileimg.name
-            url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+            url = NGINX_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
             list.append({
                 'username':user_.username,
                 'profileimg':url,
@@ -30,7 +30,7 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
         
     def get_author(self,post):
         profileimg = post.user.profileimg.name
-        url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+        url = NGINX_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
             
         return {'username':post.user.username,
                 'profileimg':url
@@ -41,7 +41,7 @@ class PostSerializer(serializers.ModelSerializer): #Serializer for the Post mode
         files = PostFiles.objects.filter(post=post)
         if files:
             for file in files:
-                fileslist.append(BACKEND_DOMAIN+MEDIA_URL+file.file.name)
+                fileslist.append(NGINX_DOMAIN+MEDIA_URL+file.file.name)
             return fileslist
 
     class Meta:
@@ -67,7 +67,7 @@ class CommentSerializer(serializers.ModelSerializer): #Serializer for the Commen
         list = []
         for user_ in comment.likes.all():
             profileimg = user_.profileimg.name
-            url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+            url = NGINX_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
             list.append({
                 'username':user_.username,
                 'profileimg':url,
@@ -79,12 +79,12 @@ class CommentSerializer(serializers.ModelSerializer): #Serializer for the Commen
         files = CommentFiles.objects.filter(comment=comment)
         if files:
             for file in files:
-                fileslist.append(BACKEND_DOMAIN+MEDIA_URL+file.file.name)
+                fileslist.append(NGINX_DOMAIN+MEDIA_URL+file.file.name)
             return fileslist
 
     def get_author(self,comment):
         profileimg = comment.user.profileimg.name
-        url = BACKEND_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
+        url = NGINX_DOMAIN+MEDIA_URL+profileimg if profileimg else '' 
             
         return {'username':comment.user.username,
                 'profileimg':url
