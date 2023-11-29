@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from backend.settings import BACKEND_DOMAIN,MEDIA_URL 
+from backend.settings import NGINX_DOMAIN,MEDIA_URL 
 from .models import Message, Chat
 from django.db.models import Q, F
 
@@ -26,7 +26,7 @@ class ChatSerializer(serializers.ModelSerializer): #Serializer for open chats
         else:
             chat_user=chat.user_one
 
-        profileimgurl = BACKEND_DOMAIN+MEDIA_URL+chat_user.profileimg.name if chat_user.profileimg else '' 
+        profileimgurl = NGINX_DOMAIN+MEDIA_URL+chat_user.profileimg.name if chat_user.profileimg else '' 
         
         return {'id':chat_user.id,
                 'username':chat_user.username,

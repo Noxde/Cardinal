@@ -21,6 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
                   
 FRONTEND_DOMAIN = 'http://localhost:3000'
 BACKEND_DOMAIN = 'http://localhost:8000'
+NGINX_DOMAIN = 'http://localhost:80'
 
 #getpost, getcomment
 ELEMENTS_PER_SCROLL = 10
@@ -59,7 +60,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'corsheaders',
     'django_extensions',
     'channels',
