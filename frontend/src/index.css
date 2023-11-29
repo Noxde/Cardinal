@@ -2,12 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @font-face {
   font-family: "Gelion Regular";
   font-style: normal;
   font-weight: normal;
-  src: local("Arial"), url("./fonts/Gelion Regular.woff") format("woff");
+  src: local("Gelion Regular"), url("./fonts/Gelion Regular.woff") format("woff");
   font-display: swap;
 }
 
@@ -16,7 +15,7 @@
   font-family: "Gelion Medium";
   font-style: normal;
   font-weight: normal;
-  src: local("Arial"), url("./fonts/Gelion Medium.woff") format("woff");
+  src: local("Gelion Medium"), url("./fonts/Gelion Medium.woff") format("woff");
   font-display: swap;
 }
 
@@ -24,7 +23,7 @@
   font-family: "Gelion Semi Bold";
   font-style: normal;
   font-weight: normal;
-  src: local("Arial"), url("./fonts/Gelion SemiBold.woff") format("woff");
+  src: local("Gelion Semi Bold"), url("./fonts/Gelion SemiBold.woff") format("woff");
   font-display: swap;
   
 }
@@ -33,17 +32,16 @@
   font-family: "Gelion Bold";
   font-style: normal;
   font-weight: normal;
-  src: local("Arial"), url("./fonts/Gelion Bold.woff") format("woff");
+  src: local("Gelion Bold"), url("./fonts/Gelion Bold.woff") format("woff");
   font-display: swap;
 }
 
+
 .Gelion-Regular {
   font-family: "Gelion Regular" !important;
-  font-weight: normal;
 }
 .Gelion-Medium {
   font-family: "Gelion Medium" !important;
-  font-weight: normal;
 }
 .Gelion-Semi-Bold {
   font-family: "Gelion Semi Bold" !important;
