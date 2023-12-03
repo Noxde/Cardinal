@@ -85,3 +85,20 @@ class getopenchats(APIView): #Gets all the open chats of an user
             response.insert(i,chat)
 
         return JsonResponse(response,safe=False,status=200)
+    
+class deletemessage(APIView): #Deletes a message
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        messageid = request.data.get('messageid',False)
+
+        if messageid:
+            try:
+                message = Message.objects.get(sender=user,id=messageid)
+                message.delete()
+                return JsonResponse({'status':'Message Deleted Successfully.'}, status=200)
+            except Message.DoesNotExist:
+                return JsonResponse({'status':f'Id "{messageid}" does not match any message sent by user "{user.username}".'}, status=404)
+        else:
+            return JsonResponse({'status':'Missing Parameter: messageid.'}, status=400)
