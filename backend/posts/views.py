@@ -238,11 +238,13 @@ class deletecomment(APIView): #Deletes a comment
     def post(self, request):
         user = request.user
         commentid = request.data.get('commentid',False)
+        if commentid:
+            try:
+                comment = Comment.objects.get(user=user,id=commentid)
+                comment.delete()
+                return JsonResponse({'status':'Comment Deleted Successfully.'}, status=200)
 
-        try:
-            comment = Comment.objects.get(user=user,id=commentid)
-            comment.delete()
-            return JsonResponse({'status':'Comment Deleted Successfully.'}, status=200)
-
-        except Comment.DoesNotExist:
-            return JsonResponse({'status':f'Id "{commentid}" does not match any comment from user "{user}".'}, status=400)
+            except Comment.DoesNotExist:
+                return JsonResponse({'status':f'Id "{commentid}" does not match any comment from user "{user}".'}, status=404)
+        else:
+            return JsonResponse({'status':'Missing Parameter: Comment ID.'}, status=400)
