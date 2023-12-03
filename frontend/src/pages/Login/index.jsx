@@ -54,6 +54,24 @@ function Login() {
           isLoading: false,
         });
       } catch (err) {
+        let errorMessage = err?.response.data.status;
+        if(errorMessage) {
+          return toast.update("signin", {
+            type: "error",
+            isLoading: false,
+            autoClose: 3000,
+            closeOnClick: true,
+            closeButton: true,
+            draggable: true,
+            render: (
+              <p>
+                {errorMessage}{" "}
+              </p>
+            ),
+            onClose: () => setDisableSign(false)
+          });
+        }
+        
         if (err.response.status === 403) {
           return toast.update("signin", {
             type: "error",
