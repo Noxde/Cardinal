@@ -203,3 +203,4 @@ AUTH_USER_MODEL = 'userauth.User'
 #Media
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+PROFILE_PLACEHOLDER_PATH = 'user/profile_placeholder.png'

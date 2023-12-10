@@ -9,7 +9,7 @@ from django.core.validators import EmailValidator
 
 
 class User(AbstractUser):     #Custom user model
-    profileimg = models.ImageField(upload_to='user/',blank=True,default='user/profile_placeholder.png')
+    profileimg = models.ImageField(upload_to='user/',blank=True,default=settings.PROFILE_PLACEHOLDER_PATH)
     banner = models.ImageField(upload_to='user/',blank=True)
     email = models.EmailField(unique=True,validators=[EmailValidator])
     about = models.TextField(max_length=1000,blank=True)
@@ -39,8 +39,8 @@ class User(AbstractUser):     #Custom user model
         return [field.name for field in User._meta.get_fields()]
     
     def delete(self, *args, **kwargs): #Deletes an user object, including related files
-
-        self.profileimg.delete(save=False)
+        if (self.profileimg.name!=settings.PROFILE_PLACEHOLDER_PATH):
+            self.profileimg.delete(save=False)
         self.banner.delete(save=False)
         super().delete(*args, **kwargs)
 
