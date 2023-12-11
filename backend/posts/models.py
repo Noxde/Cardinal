@@ -42,6 +42,14 @@ class PostFiles (models.Model): #Model for posts files
     post = models.ForeignKey(Post,on_delete=models.CASCADE)
     file = models.FileField(upload_to='post/')
 
-class CommentFiles (models.Model): #Model for posts files
+    def pre_delete(sender, **kwargs):   #Receiver function
+        if (sender == PostFiles):    #If the object being deleted is a PostFile
+            kwargs['instance'].file.delete() 
+
+class CommentFiles (models.Model): #Model for comment files
     comment = models.ForeignKey(Comment,on_delete=models.CASCADE)
     file = models.FileField(upload_to='post/')
+
+    def pre_delete(sender, **kwargs):   #Receiver function
+        if (sender == CommentFiles):    #If the object being deleted is a CommentFile
+            kwargs['instance'].file.delete() 
