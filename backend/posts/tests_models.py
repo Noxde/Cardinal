@@ -65,3 +65,48 @@ class PostTestCase(TestCase):
         self.assertEqual(Post.get_comment_amount(self.post1),3)
         comment1.delete()
         self.assertEqual(Post.get_comment_amount(self.post1),2)
+
+
+class CommentTestCase(TestCase):
+    def setUp(self):
+        self.user1 = get_user_model().objects.create(username="James",email="james@cardinal.com",password="James123")
+        self.user2 = get_user_model().objects.create(username="Gunther",email="gunther@cardinal.com",password="Gunther123")
+        self.user3 = get_user_model().objects.create(username="Sebastian",email="sebastian@cardinal.com",password="Sebastian123")
+        self.post = Post.objects.create(user=self.user1,content="Hello, James here.")
+        self.comment1 = Comment.objects.create(user=self.user1,post=self.post,content="This is my post.")
+        self.comment2 = Comment.objects.create(user=self.user2,post=self.post,content="Hello James, i am Gunther.")
+        self.comment3 = Comment.objects.create(user=self.user3,post=self.post,content="Nice post.")
+    
+    def test_comment_user(self):
+        """Comments have the right user."""
+        self.assertEqual(self.comment1.user,self.user1)
+        self.assertEqual(self.comment3.user,self.user3)
+
+    def test_comment_post(self):
+        """Comments belong to the right post."""
+        self.assertEqual(self.comment1.post,self.post)
+        self.assertEqual(self.comment2.post,self.post)
+
+    def test_comment_content(self):
+        """Comment have the correct content."""
+        self.assertEqual(self.comment2.content,"Hello James, i am Gunther.")
+        self.assertEqual(self.comment3.content,"Nice post.")
+    
+    def test_comment_creation_time(self):
+        """Comments have the correct creation time."""
+        comment = Comment.objects.create(user=self.user1,post=self.post,content="This is a comment to test creation time.")
+        self.assertAlmostEqual(comment.creation_time,datetime.now(tz=timezone.utc),delta=timedelta(milliseconds=100))
+
+    def test_comment_likes(self):
+        """Comment likes work properly."""
+        self.assertEqual(self.comment1.likes.count(),0)
+        self.comment1.likes.add(self.user1)
+        self.assertEqual(self.comment1.likes.count(),1)
+        self.comment2.likes.add(self.user1)
+        self.comment2.likes.add(self.user2)
+        self.assertEqual(self.comment2.likes.count(),2)
+        self.assertNotIn(self.user3,self.comment2.likes.all())
+        self.comment2.likes.remove(self.user2)
+        self.assertNotIn(self.user2,self.comment2.likes.all())
+        self.assertEqual(self.user1,self.comment2.likes.all()[0])
+        
