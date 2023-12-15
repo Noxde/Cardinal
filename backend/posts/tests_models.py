@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.files import File
-from .models import Post,Comment,PostFiles
+from .models import Post,Comment,PostFiles,CommentFiles
 from backend.settings import MEDIA_ROOT
 from datetime import timezone,datetime,timedelta
 from os.path import join,isfile
@@ -139,3 +139,30 @@ class PostFilesTestCase(TestCase):
         self.post.delete()
         self.assertFalse(PostFiles.objects.filter(post=self.post))
         self.assertFalse(isfile(self.file_path))        
+
+
+class CommentFilesTestCase(TestCase):
+    def setUp(self):
+        self.test_file_path = join(MEDIA_ROOT,"tests/test_image_3.jpg")
+        self.user = get_user_model().objects.create(username='Walter',email='walter@cardinal.com',password='Walter123')
+        self.post = Post.objects.create(user=self.user,content='Hello, my name is Walter.')
+        self.comment = Comment.objects.create(user=self.user,post=self.post,content="This is a comment.")
+        with open(self.test_file_path,"rb") as file: 
+            django_file = File(file,name="test_image_3.jpg")
+            self.comment_file = CommentFiles.objects.create(comment=self.comment,file=django_file)
+            self.file_path = join(MEDIA_ROOT,self.comment_file.file.name)
+        
+    def test_CommentFiles_comment(self):
+        """CommentFiles have the correct comment."""
+        self.assertEqual(self.comment_file.comment,self.comment)
+    
+    def test_CommentFiles_file(self):
+        """CommentFiles have the correct file."""
+        self.assertTrue(cmp(self.file_path,self.test_file_path,shallow=False))
+
+    def test_CommentFiles_pre_delete(self):
+        """CommentFiles are deleted correctly."""
+        self.assertTrue(isfile(self.file_path))        
+        self.comment.delete()
+        self.assertFalse(CommentFiles.objects.filter(comment=self.comment))
+        self.assertFalse(isfile(self.file_path))  
