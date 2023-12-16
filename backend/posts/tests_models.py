@@ -8,10 +8,14 @@ from os.path import join,isfile
 from filecmp import cmp
 
 class PostTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user1 = get_user_model().objects.create(username="Charles",email="Charles@cardinal.com",password="Charles123")
+        cls.user2 = get_user_model().objects.create(username="John",email="John@cardinal.com",password="John123")
+        cls.user3 = get_user_model().objects.create(username="Thomas",email="Thomas@cardinal.com",password="Thomas123")
+
     def setUp(self): 
-        self.user1 = get_user_model().objects.create(username="Charles",email="Charles@cardinal.com",password="Charles123")
-        self.user2 = get_user_model().objects.create(username="John",email="John@cardinal.com",password="John123")
-        self.user3 = get_user_model().objects.create(username="Thomas",email="Thomas@cardinal.com",password="Thomas123")
         self.post1 = Post.objects.create(user=self.user1,content="Hello World!!")
         self.post2 = Post.objects.create(user=self.user2,content="Bye World!!")
         self.post3 = Post.objects.create(user=self.user3,content="I Love Ice Cream!!")
@@ -72,10 +76,14 @@ class PostTestCase(TestCase):
 
 
 class CommentTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user1 = get_user_model().objects.create(username="James",email="james@cardinal.com",password="James123")
+        cls.user2 = get_user_model().objects.create(username="Gunther",email="gunther@cardinal.com",password="Gunther123")
+        cls.user3 = get_user_model().objects.create(username="Sebastian",email="sebastian@cardinal.com",password="Sebastian123")
+
     def setUp(self):
-        self.user1 = get_user_model().objects.create(username="James",email="james@cardinal.com",password="James123")
-        self.user2 = get_user_model().objects.create(username="Gunther",email="gunther@cardinal.com",password="Gunther123")
-        self.user3 = get_user_model().objects.create(username="Sebastian",email="sebastian@cardinal.com",password="Sebastian123")
         self.post = Post.objects.create(user=self.user1,content="Hello, James here.")
         self.comment1 = Comment.objects.create(user=self.user1,post=self.post,content="This is my post.")
         self.comment2 = Comment.objects.create(user=self.user2,post=self.post,content="Hello James, i am Gunther.")
@@ -116,9 +124,13 @@ class CommentTestCase(TestCase):
 
 
 class PostFilesTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.test_file_path = join(MEDIA_ROOT,"tests/test_image_1.jpg")
+        cls.user = get_user_model().objects.create(username='Kyle',email='kyle@cardinal.com',password='Kyle123')
+
     def setUp(self):
-        self.test_file_path = join(MEDIA_ROOT,"tests/test_image_1.jpg")
-        self.user = get_user_model().objects.create(username='Kyle',email='kyle@cardinal.com',password='Kyle123')
         self.post = Post.objects.create(user=self.user,content='Hello, my name is Kyle.')
         with open(self.test_file_path,"rb") as file: 
             django_file = File(file,name="test_image_1.jpg")
@@ -142,9 +154,13 @@ class PostFilesTestCase(TestCase):
 
 
 class CommentFilesTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.test_file_path = join(MEDIA_ROOT,"tests/test_image_3.jpg")
+        cls.user = get_user_model().objects.create(username='Walter',email='walter@cardinal.com',password='Walter123')
+
     def setUp(self):
-        self.test_file_path = join(MEDIA_ROOT,"tests/test_image_3.jpg")
-        self.user = get_user_model().objects.create(username='Walter',email='walter@cardinal.com',password='Walter123')
         self.post = Post.objects.create(user=self.user,content='Hello, my name is Walter.')
         self.comment = Comment.objects.create(user=self.user,post=self.post,content="This is a comment.")
         with open(self.test_file_path,"rb") as file: 
