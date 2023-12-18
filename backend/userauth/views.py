@@ -143,7 +143,6 @@ def register(request):       #Creates a new user with the given data and sends c
     birth_date = request.data.get('birth_date',False)
     if birth_date:
         setattr(user,'birth_date',getdatetime(birth_date)) 
-    user.date_joined = datetime.datetime.now()
 
     user.save()
 

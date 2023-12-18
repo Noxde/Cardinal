@@ -16,13 +16,13 @@ class User(AbstractUser):     #Custom user model
     region = models.CharField(max_length=50,blank=True)
     lang = models.CharField(max_length=50,blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    date_joined = models.DateField(null=True, blank=True)
+    date_joined = models.DateField(auto_now_add=True)
     last_login = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
     follows = models.ManyToManyField('self',symmetrical=False,blank=True)
     show_validation = models.BooleanField(default=1)
-    last_post = models.IntegerField(default=0)
-    last_comment = models.IntegerField(default=0)
+    last_post = models.IntegerField(default=0)          #Last requested post
+    last_comment = models.IntegerField(default=0)       #Last requested comment
 
     def __setattr__(self, attr,value): 
         if (attr == 'profileimg' or attr == 'banner') and (value and not isinstance(value,str)):#If the attribute to set is an image
