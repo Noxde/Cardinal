@@ -27,9 +27,12 @@ const useAxios = () => {
       }
     );
 
-    localStorage.setItem("authTokens", JSON.stringify(response.data));
+    let expires = new Date(Number(`${userToken.exp}000`));
+    document.cookie = `authTokens=${JSON.stringify(
+      response.data
+    )};expires=${expires}`;
+    // localStorage.setItem("authTokens", JSON.stringify(response.data));
     setAuthTokens(response.data);
-    setUser({ ...user, ...jwtDecode(response.data.access) });
 
     req.headers.Authorization = `Bearer ${response.data.access}`;
     return req;

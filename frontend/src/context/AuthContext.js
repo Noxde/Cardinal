@@ -17,17 +17,28 @@ const getCsrf = async () => {
 export default AuthContext;
 
 export const AuthProvider = ({ children }) => {
-  const [authTokens, setAuthTokens] = useState(() =>
-    localStorage.getItem("authTokens")
-      ? JSON.parse(localStorage.getItem("authTokens"))
-      : null
-  );
   //TODO: store user object instead of username
   const [user, setUser] = useState(() =>
     localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user"))
       : null
   );
+
+  const [authTokens, setAuthTokens] = useState(() => {
+    let cookies = document.cookie.split(";");
+    let match = cookies.filter((x) => x.includes("authTokens"));
+    let token = match.length > 0 ? JSON.parse(match[0].split("=")[1]) : null;
+    // If authTokens no longer exist delete user from localStorage
+    // FIXME: authTokens becomes null after refreshing the site when jwt expires (15 minutes)
+    if (!token) {
+      setUser(null);
+      console.info("authTokens is null, deleting user");
+      console.info("could refresh token instead");
+      return;
+    }
+
+    return token; // Set tokens if they exist
+  });
 
   const registerUser = async (userInfo) => {
     const { email, username, password } = userInfo;
@@ -78,13 +89,17 @@ export const AuthProvider = ({ children }) => {
         });
         // Update states
         setAuthTokens(res.data);
-        setUser({ ...jwt_decode(res.data.access), ...data });
-        // Update local storage
-        localStorage.setItem("authTokens", JSON.stringify(res.data));
-        localStorage.setItem(
-          "user",
-          JSON.stringify({ ...jwt_decode(res.data.access), ...data })
-        );
+        setUser(data);
+
+        // Get expiry date
+        let expires = new Date(Number(`${jwt_decode(res.data.access).exp}000`));
+
+        // Update tokens cookie
+        document.cookie = `authTokens=${JSON.stringify(
+          res.data
+        )};expires=${expires.toUTCString()};`;
+
+        localStorage.setItem("user", JSON.stringify(data));
       }, 1000);
     } else {
       throw new Error("Something went wrong.");
@@ -94,7 +109,7 @@ export const AuthProvider = ({ children }) => {
   const logoutUser = () => {
     setAuthTokens(null);
     setUser(null);
-    localStorage.removeItem("authTokens");
+    document.cookie = "authTokens=;expires=Thu, 01 Jan 1970 00:00:00 UTC;";
     localStorage.removeItem("user");
   };
 
