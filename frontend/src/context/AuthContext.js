@@ -106,7 +106,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logoutUser = () => {
+  const logoutUser = async () => {
+    // Blacklist refresh token
+    await instance.post(
+      "/logout/",
+      qs.stringify({
+        refresh: authTokens.refresh,
+      })
+    );
+
     setAuthTokens(null);
     setUser(null);
     document.cookie = "authTokens=;expires=Thu, 01 Jan 1970 00:00:00 UTC;";
