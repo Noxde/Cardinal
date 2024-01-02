@@ -1,5 +1,6 @@
 import { useContext, useState, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
+import MobileMenu from "./MobileMenu";
 import AuthContext from "../context/AuthContext";
 import NewPost from "./NewPost";
 
@@ -8,11 +9,12 @@ import { GoSearch } from "react-icons/go";
 import { CgProfile } from "react-icons/cg";
 import { HiEllipsisHorizontal } from "react-icons/hi2";
 import { TfiEmail, TfiPencil } from "react-icons/tfi";
-import { MdLogout } from "react-icons/md";
+import { MdLogout, MdSettings } from "react-icons/md";
 
 function Layout() {
   const { user, logoutUser } = useContext(AuthContext);
   const [newPost, setNewPost] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   let iconSize = "30px";
 
   useEffect(() => {
@@ -25,7 +27,16 @@ function Layout() {
   }
 
   return (
-    <div className="lg:grid grid-cols-[2fr,5fr,2.5fr] lg:max-w-[1900px] lg:mx-auto">
+    <div
+      className="lg:grid grid-cols-[2fr,5fr,2.5fr] lg:max-w-[1900px] lg:mx-auto"
+      onClick={({ target }) => {
+        if (target.classList.contains("mobileProfile")) {
+          setMobileOpen((e) => !e);
+        } else {
+          setMobileOpen(false);
+        }
+      }}
+    >
       <div className="hidden lg:flex justify-center h-full bg-white border-r border-[#e6e6e6] z-10">
         <div className="sticky flex flex-col h-screen p-10 pr-5 top-0 flex-1">
           <img src="/logo.svg" width={"50px"} />
@@ -114,20 +125,13 @@ function Layout() {
         <button>
           <TfiEmail size={iconSize} color="#908f94" />
         </button>
-        <div className="relative group/profile">
-          <div className="absolute p-4 z-10 bottom-full right-1/2 translate-x-1/2 bg-white hidden group-hover/profile:block">
-            <ul>
-              <li>
-                <Link to={"profile"}>Profile</Link>
-              </li>
-              <li>Manage Account</li>
-            </ul>
-          </div>
+        <div className="relative">
+          <MobileMenu isOpen={mobileOpen} />
           <img
             src={user?.profileimg || "/assets/profile_placeholder.png"}
             width={iconSize}
             alt="profile placeholder"
-            className="rounded-full object-cover aspect-square"
+            className="mobileProfile rounded-full object-cover aspect-square"
           />
         </div>
       </div>
