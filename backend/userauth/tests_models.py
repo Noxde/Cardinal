@@ -1,8 +1,8 @@
 from django.test import TestCase,Client
 from django.core.files import File
-from .models import User
+from .models import User, Emails
 from posts.models import Post, Comment
-from backend.settings import MEDIA_ROOT,PROFILE_PLACEHOLDER_PATH
+from backend.settings import MEDIA_ROOT, PROFILE_PLACEHOLDER_PATH, HOURLY_LIMIT, DAILY_LIMIT
 from os.path import join,isfile
 from datetime import date, datetime, timezone, timedelta
 from filecmp import cmp
@@ -153,4 +153,64 @@ class UserTestCase(TestCase):
         test_user.delete()
         self.assertFalse(User.objects.filter(id=test_user.id))
         self.assertFalse(isfile(join(MEDIA_ROOT,"user",test_file.name)))
+
+
+class EmailsTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='Lois')
+    
+    def create_test_email(self):
+        self.email = Emails.objects.create(user=self.user,subject='EC')
+
+    def test_emails_variables(self):
+        """Emails class variables are OK."""
+        self.assertEqual(Emails.EMAILCONFIRMATION,'EC')
+        self.assertEqual(Emails.PASSWORDRESET,'PR')
+        self.assertEqual(Emails.ACCOUNTDELETE,'AD')
+    
+    def test_emails_user(self):
+        """Emails.user is OK."""
+        self.create_test_email()
+        self.assertEqual(self.email.user,self.user)
+
+    def test_emails_time(self):
+        """Emails.time is OK."""
+        self.create_test_email()
+        self.assertAlmostEqual(self.email.time,datetime.now(timezone.utc),delta=timedelta(milliseconds=100))
                     
+    def test_emails_subject(self):
+        """Emails.subject is OK."""
+        self.create_test_email()
+        self.assertEqual(self.email.subject,Emails.EMAILCONFIRMATION)
+    
+    def test_emails_last_hour(self):
+        """Emails.last_hour() is OK."""
+        self.assertAlmostEqual(Emails.last_hour(),datetime.now(timezone.utc) - timedelta(hours=1),delta=timedelta(milliseconds=20))
+
+    def test_emails_last_day(self):
+        """Emails.last_day() is OK."""
+        self.assertAlmostEqual(Emails.last_day(),datetime.now(timezone.utc) - timedelta(days=1),delta=timedelta(milliseconds=20))
+
+    def test_emails_reset(self):
+        """Emails.reset() is OK."""
+        self.assertFalse(Emails.objects.filter(user=self.user))
+        for i in range(4):
+            email = Emails.objects.create(user=self.user,subject=Emails.EMAILCONFIRMATION)
+            email.time=(datetime.now(timezone.utc)-timedelta(hours=36))
+            email.save()
+        self.assertEqual(Emails.objects.filter(user=self.user).count(),4)
+        Emails.reset(self.user)
+        self.assertFalse(Emails.objects.filter(user=self.user))
+
+    def test_emails_spam(self):
+        """Emails.spam() is OK."""
+        self.assertFalse(Emails.spam(self.user,Emails.EMAILCONFIRMATION))
+        for i in range(HOURLY_LIMIT+1):
+            self.create_test_email()
+        self.assertTrue(Emails.spam(self.user,Emails.EMAILCONFIRMATION))
+        self.assertFalse(Emails.spam(self.user,Emails.PASSWORDRESET))
+        for i in range(DAILY_LIMIT+1):
+            email = Emails.objects.create(user=self.user,subject=Emails.PASSWORDRESET)
+            email.time=(datetime.now(timezone.utc)-timedelta(hours=10))
+            email.save()
+        self.assertTrue(Emails.spam(self.user,Emails.PASSWORDRESET))
