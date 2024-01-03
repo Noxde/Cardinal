@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth import get_user_model
 from django.utils.encoding import force_bytes, force_str
@@ -26,3 +26,9 @@ class ViewsTestCase(TestCase):
         token = account_activation_token.make_token(user)
         self.assertFalse(v.ValidateEmail("UID64","TOKEN"))
         self.assertEqual(v.ValidateEmail(uidb64=uidb64,token=token),user)
+
+    def test_csrf(self):
+        """Csrf view is OK."""
+        c = Client()
+        response = c.get("/csrf/")
+        self.assertTrue(response.json()['csrfToken'])
