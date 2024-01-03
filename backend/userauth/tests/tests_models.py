@@ -1,6 +1,6 @@
 from django.test import TestCase,Client
 from django.core.files import File
-from .models import User, Emails
+from ..models import User, Emails
 from posts.models import Post, Comment
 from backend.settings import MEDIA_ROOT, PROFILE_PLACEHOLDER_PATH, HOURLY_LIMIT, DAILY_LIMIT
 from os.path import join,isfile
