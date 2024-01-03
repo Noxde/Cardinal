@@ -118,7 +118,7 @@ def register(request):       #Creates a new user with the given data and sends c
         if get_user_model().objects.get(username=data['username'],email=data['email']).is_active == 0: 
             return JsonResponse({'status':'Account already created. Email not confirmed.'}, status=403)
     except get_user_model().DoesNotExist as e: 
-        print(e)
+        pass
         
 
     response=[] #Verifies if the credentials are already in use

@@ -54,3 +54,22 @@ class ViewsTestCase(TestCase):
         response = c.post("/login/",{'id':'James@cardinal.com','password':'James123'})   
         self.assertTrue(response.json()['refresh'])
         self.assertTrue(response.json()['access'])
+    
+    def test_register(self):
+        """Register view is OK."""
+        c = Client()
+        response = c.post("/register/",{'username':'Richard',
+                                        'email':'Richard@cardinal.com',
+                                        'password':'Richard123',
+                                        'about':'Hi, im Richard!',
+                                        'region':'Alaska'})
+        self.assertEqual(response.status_code,302)
+        user = get_user_model().objects.get(username='Richard',
+                                            email='Richard@cardinal.com',
+                                            about='Hi, im Richard!',
+                                            region='Alaska')
+        self.assertTrue(user.check_password('Richard123'))
+        response = c.post("/register/",{'username':'Richard',
+                                        'email':'Richard@cardinal.com',
+                                        'password':'Richard123'})
+        self.assertEqual(response.json()['status'],'Account already created. Email not confirmed.')
