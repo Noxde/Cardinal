@@ -38,3 +38,19 @@ class ViewsTestCase(TestCase):
         c = Client()
         response = c.post("/ping/")
         self.assertTrue(response.json()['result'])
+    
+    def test_login(self):
+        """Login view is OK."""
+        login_user = get_user_model().objects.create(username="James",email='James@cardinal.com')
+        login_user.is_active = True
+        login_user.set_password("James123")
+        login_user.save()
+        c = Client()
+        #Logs in using the username as id, and checks for JWTs
+        response = c.post("/login/",{'id':'James','password':'James123'})   
+        self.assertTrue(response.json()['refresh'])
+        self.assertTrue(response.json()['access'])
+        #Logs in using the email as id, and checks for JWTs
+        response = c.post("/login/",{'id':'James@cardinal.com','password':'James123'})   
+        self.assertTrue(response.json()['refresh'])
+        self.assertTrue(response.json()['access'])
