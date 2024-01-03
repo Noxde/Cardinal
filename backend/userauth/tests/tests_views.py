@@ -32,3 +32,9 @@ class ViewsTestCase(TestCase):
         c = Client()
         response = c.get("/csrf/")
         self.assertTrue(response.json()['csrfToken'])
+
+    def test_ping(self):
+        """Ping view is OK."""
+        c = Client()
+        response = c.post("/ping/")
+        self.assertTrue(response.json()['result'])
