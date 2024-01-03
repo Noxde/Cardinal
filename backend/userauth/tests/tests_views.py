@@ -1,8 +1,9 @@
 from django.test import TestCase, Client
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth import get_user_model
-from django.utils.encoding import force_bytes, force_str
+from django.utils.encoding import force_bytes
 import userauth.views as v
+from userauth.serializers import UserSerializer
 from userauth.tokens import account_activation_token
 from datetime import datetime
 
@@ -73,3 +74,18 @@ class ViewsTestCase(TestCase):
                                         'email':'Richard@cardinal.com',
                                         'password':'Richard123'})
         self.assertEqual(response.json()['status'],'Account already created. Email not confirmed.')
+    
+    def test_getuserinfo(self):
+        """Getuserinfo view is OK."""
+        user = get_user_model().objects.create(username='Nathan',email='Nathan@cardinal.com')
+        user.is_active = True
+        user.set_password('Nathan123')
+        user.save()
+        c = Client()
+        #Logs in the user to get the JWTs
+        login = c.post("/login/",{"id":user.username,"password":"Nathan123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+        response = c.get("/getuserinfo/")
+        #Gets the user again to update the 'last_login' field
+        user = get_user_model().objects.get(id=user.id)
+        self.assertEqual(dict(UserSerializer(user).data),response.json())
