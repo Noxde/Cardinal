@@ -167,7 +167,6 @@ def getpublicprofile(request,username): #Returns the public data of an user
 
 
     except get_user_model().DoesNotExist:
-        print('hi')
         return JsonResponse({'status':f'Username "{username}" does not match any user.'}, status=400)
 
 

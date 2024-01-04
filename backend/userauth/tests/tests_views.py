@@ -3,7 +3,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth import get_user_model
 from django.utils.encoding import force_bytes
 import userauth.views as v
-from userauth.serializers import UserSerializer
+from userauth.serializers import UserSerializer, ProfileSerializer
 from userauth.tokens import account_activation_token
 from datetime import datetime
 
@@ -89,3 +89,21 @@ class ViewsTestCase(TestCase):
         #Gets the user again to update the 'last_login' field
         user = get_user_model().objects.get(id=user.id)
         self.assertEqual(dict(UserSerializer(user).data),response.json())
+        
+    def test_getpublicprofile(self):
+        """Getpublicprofile view is OK."""
+        c = Client()
+        response = c.get("/getpublicprofile/James/")
+        self.assertEqual(response.json()['status'],'Username "James" does not match any user.')
+        user = get_user_model().objects.create(username='James',
+                                               email='James@cardinal.com',
+                                               about='My name is James.',
+                                               lang='Italian')
+        user.set_password('James123')
+        user.save()
+        response = c.get("/getpublicprofile/James/")
+        self.assertEqual(response.json()['status'],'User "James" is not active.')
+        user.is_active = True 
+        user.save()
+        response = c.get("/getpublicprofile/James/")
+        self.assertEqual(ProfileSerializer(user).data,response.json())
