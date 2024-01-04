@@ -107,3 +107,28 @@ class ViewsTestCase(TestCase):
         user.save()
         response = c.get("/getpublicprofile/James/")
         self.assertEqual(ProfileSerializer(user).data,response.json())
+
+    def test_moduserinfo(self):
+        """Moduserinfo view is OK."""
+        user = get_user_model().objects.create(username='Aaron',
+                                               email='Aaron@cardinal.com',
+                                               about="I like tables.",
+                                               last_name='Mc Gill')
+        user.is_active = True
+        user.set_password('Aaron123')
+        user.save()
+        c = Client()
+        #Logs in the user to get the JWTs
+        login = c.post("/login/",{"id":user.username,"password":"Aaron123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+        response = c.post("/moduserinfo/")
+        self.assertEqual(response.json()['status'],'Failed to modify user')
+        response = c.get("/getuserinfo/")
+        self.assertEqual(response.json()['about'],'I like tables.')
+        self.assertEqual(response.json()['last_name'],'Mc Gill')
+        response = c.post("/moduserinfo/",{'about':'I like chairs.','last_name':'Peterson'})
+        self.assertEqual(response.json()['status'],'User modified Successfully.')
+        self.assertEqual(response.json()['modifiedfields'],['last_name','about'])
+        response = c.get("/getuserinfo/")
+        self.assertEqual(response.json()['about'],'I like chairs.')
+        self.assertEqual(response.json()['last_name'],'Peterson')

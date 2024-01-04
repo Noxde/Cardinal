@@ -188,7 +188,7 @@ class moduserinfo(APIView): #Allows to modify user data
         'banner',
         ]
 
-    def post(self, request):       #Creates a new user with the given data
+    def post(self, request):       
         modifiedfields = []
         user = get_user_model().objects.get(username=request.user.username)
 
