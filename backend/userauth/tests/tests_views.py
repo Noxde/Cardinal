@@ -132,3 +132,28 @@ class ViewsTestCase(TestCase):
         response = c.get("/getuserinfo/")
         self.assertEqual(response.json()['about'],'I like chairs.')
         self.assertEqual(response.json()['last_name'],'Peterson')
+
+    def test_follows(self):
+        """Follows view is OK."""
+        c = Client()
+        user = get_user_model().objects.create(username='Paul',email='Paul@cardinal.com')
+        user.is_active = True
+        user.set_password('Paul123')
+        user.save()
+        c = Client()
+        #Logs in the user to get the JWTs
+        login = c.post("/login/",{"id":user.username,"password":"Paul123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+        response = c.post("/follows/")
+        self.assertEqual(response.json()['status'],'"usernames" parameter is wrong or missing.')   
+        response = c.post("/follows/",{'usernames':['Lyla','Homer']})
+        self.assertEqual(response.json()['status'],'"action" parameter is wrong or missing.')   
+        response = c.post("/follows/",{'usernames':['Lyla','Homer'],'action':'remove'})
+        self.assertEqual(response.json()['status'],'No change was made')  
+        get_user_model().objects.create(username='Lyla',email='Lyla@cardinal.com')
+        get_user_model().objects.create(username='Homer',email='Homer@cardinal.com')
+        response = c.post("/follows/",{'usernames':['Lyla','Homer'],'action':'add'})
+        self.assertEqual(response.json()['status'],'Addition successful.')  
+        self.assertEqual(response.json()['changes'],['Lyla','Homer'])  
+        response = c.post("/follows/",{'usernames':['Carl','Nicholas'],'action':'add'})
+        self.assertEqual(response.json()['status'],'No change was made')  

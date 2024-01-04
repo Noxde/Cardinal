@@ -218,7 +218,7 @@ class follows(APIView): #Adds and removes users from following
         if usernames:
             changes = usernames.copy()
         else:
-            return JsonResponse({'status':'"usernames" parameter is wrong or misssing.'}, status=400)
+            return JsonResponse({'status':'"usernames" parameter is wrong or missing.'}, status=400)
         mainUser = request.user
         if action == 'add':
             for username in usernames:
@@ -248,7 +248,7 @@ class follows(APIView): #Adds and removes users from following
 
                 
         else:
-            return JsonResponse({'status':'"action" parameter is wrong or misssing.'}, status=400)
+            return JsonResponse({'status':'"action" parameter is wrong or missing.'}, status=400)
             
 
 
