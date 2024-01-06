@@ -329,7 +329,7 @@ def ShowValidationPage(request,username): #Returns whether the frontend should r
     try:
         user = get_user_model().objects.get(username=username)
     except get_user_model().DoesNotExist:
-        return JsonResponse({'status':'Username "{username}" did not match any user.'}, status=400)
+        return JsonResponse({'status':f'Username "{username}" did not match any user.'}, status=400)
     
     if user.is_active and user.show_validation:
         user.show_validation = False
@@ -337,8 +337,3 @@ def ShowValidationPage(request,username): #Returns whether the frontend should r
         return JsonResponse({'status':'Validation page allowed.'}, status=200)
     else:
         return JsonResponse({'status':'Validation page denied.'}, status=200)
-
-
-        
-
-

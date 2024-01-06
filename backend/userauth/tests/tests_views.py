@@ -243,3 +243,21 @@ class ViewsTestCase(TestCase):
         response = c.post('/passwordreset/',{'uidb64':uidb64,'token':token,'password':'NewTestPassword'})
         self.assertEqual(response.json()['status'],'Password reset succesful.')
         self.assertTrue(get_user_model().objects.get(id=user.id).check_password('NewTestPassword'))
+
+    def test_show_validation_page(self):
+        """ShowValidationPage view is OK."""
+        user = get_user_model().objects.create(username="TestUser",is_active=True)
+        self.assertTrue(get_user_model().objects.get(id=user.id).show_validation)        
+        c = Client()
+        #Test the view with an invalid username
+        response = c.get('/showvalidationpage/InvalidUsername/')
+        self.assertEqual(response.json()['status'],'Username "InvalidUsername" did not match any user.')
+        self.assertTrue(get_user_model().objects.get(id=user.id).show_validation)        
+        #Test the view with a valid username
+        response = c.get(f'/showvalidationpage/{user.username}/')
+        self.assertEqual(response.json()['status'],'Validation page allowed.')
+        self.assertFalse(get_user_model().objects.get(id=user.id).show_validation)        
+        #Test the view with a valid username
+        response = c.get(f'/showvalidationpage/{user.username}/')
+        self.assertEqual(response.json()['status'],'Validation page denied.')
+        self.assertFalse(get_user_model().objects.get(id=user.id).show_validation)        
