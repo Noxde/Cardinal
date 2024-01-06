@@ -3,6 +3,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth import get_user_model
 from django.utils.encoding import force_bytes
 from django.core import mail
+from backend import settings
 import userauth.views as v
 from userauth.serializers import UserSerializer, ProfileSerializer
 from userauth.tokens import account_activation_token
@@ -190,3 +191,21 @@ class ViewsTestCase(TestCase):
         uidb64 = link.split('/')[-2]
         token = link.split('/')[-1].split('"')[0]
         self.assertEqual(v.ValidateEmail(uidb64=uidb64,token=token),user)
+
+    def test_confirm_email(self):
+        """ConfirmEmail view is OK."""
+        user = get_user_model().objects.create(username="TestUser")
+        self.assertFalse(user.is_active)
+        c = Client()
+        #Test the view with invalid uidb64 and token
+        response = c.get('/emailconfirmation/uidb64/token')
+        self.assertEqual(response.status_code,302)
+        self.assertEqual(response.headers['Location'],settings.FRONTEND_DOMAIN)
+        self.assertFalse(get_user_model().objects.get(username="TestUser").is_active)
+        #Test the view with valid uidb64 and token
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = account_activation_token.make_token(user)
+        response = c.get(f'/emailconfirmation/{uidb64}/{token}')
+        self.assertEqual(response.status_code,302)
+        self.assertEqual(response.headers['Location'],f'{settings.FRONTEND_DOMAIN}/confirmed-email/{user.username}')
+        self.assertTrue(get_user_model().objects.get(username="TestUser").is_active)
