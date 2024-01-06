@@ -226,3 +226,20 @@ class ViewsTestCase(TestCase):
         self.assertEqual(response.status_code,302)
         self.assertEqual(response.headers['Location'],f'{settings.FRONTEND_DOMAIN}/account-delete/')
         self.assertFalse(get_user_model().objects.filter(username="TestUser"))
+
+    def test_reset_password(self):
+        """ResetPassword view is OK."""
+        user = get_user_model().objects.create(username="TestUser")
+        user.set_password('TestPassword')
+        self.assertTrue(user.check_password('TestPassword'))
+        c = Client()
+        #Test the view with invalid uidb64 and token
+        response = c.post('/passwordreset/',{'uidb64':'FalseUIDB64','token':'FalseToken'})
+        self.assertEqual(response.json()['status'],'Password reset failed.')
+        self.assertTrue(user.check_password('TestPassword'))
+        #Test the view with valid uidb64 and token
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = account_activation_token.make_token(user)
+        response = c.post('/passwordreset/',{'uidb64':uidb64,'token':token,'password':'NewTestPassword'})
+        self.assertEqual(response.json()['status'],'Password reset succesful.')
+        self.assertTrue(get_user_model().objects.get(id=user.id).check_password('NewTestPassword'))
