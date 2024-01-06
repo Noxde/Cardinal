@@ -2,10 +2,13 @@ from django.test import TestCase, Client
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth import get_user_model
 from django.utils.encoding import force_bytes
+from django.core import mail
 import userauth.views as v
 from userauth.serializers import UserSerializer, ProfileSerializer
 from userauth.tokens import account_activation_token
 from datetime import datetime
+import re
+from decouple import config
 
 class ViewsTestCase(TestCase):
 
@@ -157,3 +160,33 @@ class ViewsTestCase(TestCase):
         self.assertEqual(response.json()['changes'],['Lyla','Homer'])  
         response = c.post("/follows/",{'usernames':['Carl','Nicholas'],'action':'add'})
         self.assertEqual(response.json()['status'],'No change was made')  
+
+    def test_send_email(self):
+        """SendEmail view is OK."""
+        gmail_address = config('GMAIL_ADDRESS')
+        user = get_user_model().objects.create(username='Tester',email=gmail_address,password='Plain text',is_active=True)
+        c = Client()
+        #Test for EC emails
+        response = c.get(f'/sendemail/EC/{gmail_address}/')
+        self.assertEqual(response.json()['status'],'Email confirmation email sent.')
+        self.assertEqual(mail.outbox[-1].subject,'Email confirmation.')
+        link = re.search('href=".+"',mail.outbox[-1].body).group()
+        uidb64 = link.split('/')[-2]
+        token = link.split('/')[-1].split('"')[0]
+        self.assertEqual(v.ValidateEmail(uidb64=uidb64,token=token),user)
+        #Test for PR emails
+        response = c.get(f'/sendemail/PR/{gmail_address}/')
+        self.assertEqual(response.json()['status'],'Password reset email sent.')
+        self.assertEqual(mail.outbox[-1].subject,'Password reset.')
+        link = re.search('href=".+"',mail.outbox[-1].body).group()
+        uidb64 = link.split('/')[-3]
+        token = link.split('/')[-2]
+        self.assertEqual(v.ValidateEmail(uidb64=uidb64,token=token),user)
+        #Test for AD emails
+        response = c.get(f'/sendemail/AD/{gmail_address}/')
+        self.assertEqual(response.json()['status'],'Account delete email sent.')
+        self.assertEqual(mail.outbox[-1].subject,'Account delete.')
+        link = re.search('href=".+"',mail.outbox[-1].body).group()
+        uidb64 = link.split('/')[-2]
+        token = link.split('/')[-1].split('"')[0]
+        self.assertEqual(v.ValidateEmail(uidb64=uidb64,token=token),user)
