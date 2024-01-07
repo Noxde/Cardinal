@@ -39,12 +39,12 @@ class ChatConsumer(AsyncWebsocketConsumer,JWTAuthentication):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         text_data_json["type"] = "chat_message"
-        text_data_json["sender"] = self.user.username
+        text_data_json["sender"] = self.user.id
 
         try:
             # Saves the message in the database
             receiver = await database_sync_to_async(self.user_model.objects.get)(username=text_data_json["receiver"])
-            await database_sync_to_async(Message.objects.create)(content=text_data_json["message"],sender=self.user,receiver=receiver)
+            await database_sync_to_async(Message.objects.create)(content=text_data_json["content"],sender=self.user,receiver=receiver)
 
             # Send message to room group
             await self.channel_layer.group_send(
