@@ -50,8 +50,8 @@ class createchat(APIView): #Creates a Chat object
                 return JsonResponse({'status':f'Username "{username_two}" does not match any user.'},status=400)
             
             elif isinstance(error, Chat.DoesNotExist):
-                Chat.objects.create(user_one=user_one,user_two=user_two)
-                return JsonResponse({'status':'Chat created successfully.'},status=201)
+                chat = Chat.objects.create(user_one=user_one,user_two=user_two)
+                return JsonResponse(ChatSerializer(chat,context={'loguser':user_one}).data,status=201)
             
             elif isinstance(error, Chat.MultipleObjectsReturned):
                 return JsonResponse({'status':'MultipleObjectsReturned, Chat creation avoided.'},status=200)
