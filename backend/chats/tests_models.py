@@ -57,3 +57,17 @@ class MessageTestCase(TestCase):
         """Message creation_time is correct."""
         message = Message.objects.create(content="I am speed.",sender=self.user1,receiver=self.user2)
         self.assertAlmostEqual(message.creation_time,datetime.now(tz=timezone.utc),delta=timedelta(milliseconds=100))
+
+    def test_Message_show_to_sender(self):
+        """Message.show_to_sender is OK."""
+        self.assertTrue(self.message.show_to_sender)
+        self.message.show_to_sender = False 
+        self.message.save()
+        self.assertFalse(Message.objects.get(id=self.message.id).show_to_sender)
+
+    def test_Message_show_to_receiver(self):
+        """Message.show_to_receiver is OK."""
+        self.assertTrue(self.message.show_to_receiver)
+        self.message.show_to_receiver = False 
+        self.message.save()
+        self.assertFalse(Message.objects.get(id=self.message.id).show_to_receiver)

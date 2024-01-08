@@ -14,3 +14,5 @@ class Message(models.Model): #Model for chat messages
     sender = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,related_name="sender")
     receiver = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,related_name="receiver")
     creation_time = models.DateTimeField(auto_now_add=True)
+    show_to_sender = models.BooleanField(default=True)
+    show_to_receiver = models.BooleanField(default=True)
