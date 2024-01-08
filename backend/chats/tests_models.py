@@ -19,6 +19,19 @@ class ChatTestCase(TestCase):
         """Chat.user_two is OK."""
         self.assertEqual(self.user2,self.chat.user_two)
 
+    def test_Chat_show_to_user_one(self):
+        """Chat.show_to_user_one is OK."""
+        self.assertTrue(self.chat.show_to_user_one)
+        self.chat.show_to_user_one = False 
+        self.chat.save()
+        self.assertFalse(Chat.objects.get(id=self.chat.id).show_to_user_one)
+
+    def test_Chat_show_to_user_two(self):
+        """Chat.show_to_user_two is OK."""
+        self.assertTrue(self.chat.show_to_user_two)
+        self.chat.show_to_user_two = False 
+        self.chat.save()
+        self.assertFalse(Chat.objects.get(id=self.chat.id).show_to_user_two)
 
 class MessageTestCase(TestCase):
     @classmethod
