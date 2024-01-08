@@ -4,12 +4,15 @@ import MobileMenu from "./MobileMenu";
 import AuthContext from "../context/AuthContext";
 import NewPost from "./NewPost";
 
-import { AiFillHome } from "react-icons/ai";
-import { GoSearch } from "react-icons/go";
-import { CgProfile } from "react-icons/cg";
-import { HiEllipsisHorizontal } from "react-icons/hi2";
-import { TfiEmail, TfiPencil } from "react-icons/tfi";
-import { MdLogout, MdSettings } from "react-icons/md";
+import {
+  FiHome,
+  FiMessageSquare,
+  FiUser,
+  FiSettings,
+  FiSearch,
+  FiEdit,
+} from "react-icons/fi";
+import { MdLogout } from "react-icons/md";
 
 function Layout() {
   const { user, logoutUser } = useContext(AuthContext);
@@ -41,10 +44,10 @@ function Layout() {
         <div className="sticky flex flex-col h-screen p-10 pr-5 top-0 flex-1">
           <img src="/logo.svg" width={"50px"} />
           <nav className="text-2xl Gelion-Medium mt-10">
-            <ul className="space-y-4">
+            <ul className="space-y-4 dark-blue">
               <li>
                 <Link to={"/"}>
-                  <AiFillHome className="inline mr-4" size={"25px"} />
+                  <FiHome className="inline mr-4" size={"25px"} />
                   Home
                 </Link>
               </li>
@@ -52,13 +55,13 @@ function Layout() {
                 <>
                   <li>
                     <Link>
-                      <TfiEmail className="inline mr-4" size={"25px"} />
+                      <FiMessageSquare className="inline mr-4" size={"25px"} />
                       Messages
                     </Link>
                   </li>
                   <li>
                     <Link to="/profile">
-                      <CgProfile className="inline mr-4" size={"25px"} />
+                      <FiUser className="inline mr-4" size={"25px"} />
                       Profile
                     </Link>
                   </li>
@@ -66,8 +69,8 @@ function Layout() {
               )}
               <li>
                 <Link>
-                  <HiEllipsisHorizontal className="inline mr-4" size={"25px"} />
-                  More
+                  <FiSettings className="inline mr-4" size={"25px"} />
+                  Settings
                 </Link>
               </li>
               {user && (
@@ -108,10 +111,10 @@ function Layout() {
       <div className="hidden lg:block h-full bg-white border-l border-[#e6e6e6] z-30"></div>
       <div className="lg:hidden flex py-2 px-1 items-center justify-around fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full w-[90%] bg-white shadow-[0px_4px_30px_-5px_rgba(0,0,0,0.2)]">
         <Link to="/">
-          <AiFillHome size={iconSize} color="#3e4fe5" />
+          <FiHome size={iconSize} color="#3e4fe5" />
         </Link>
         <button>
-          <GoSearch size={iconSize} color="#908f94" />
+          <FiSearch size={iconSize} color="#908f94" />
         </button>
 
         <button
@@ -120,10 +123,10 @@ function Layout() {
           }
           className="flex items-center justify-center relative rounded-full -mt-6 -top-3 bg-[#3e4fe5] w-[70px] aspect-[1/1]"
         >
-          <TfiPencil size={iconSize} color="white" />
+          <FiEdit size={iconSize} color="white" />
         </button>
         <button>
-          <TfiEmail size={iconSize} color="#908f94" />
+          <FiMessageSquare size={iconSize} color="#908f94" />
         </button>
         <div className="relative">
           <MobileMenu isOpen={mobileOpen} />
