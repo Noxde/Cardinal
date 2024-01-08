@@ -20,6 +20,10 @@ class getchat(APIView): #Returns the messages from a chat
             chatuser = self.user_model.objects.get(username=chat)
             qs = Message.objects.filter(Q(sender=loguser) | Q(sender=chatuser))
             qs = qs.filter(Q(receiver=loguser) | Q(receiver=chatuser)).order_by('id')
+            #Exclude hidden messages
+            qs = qs.exclude(Q(sender=loguser) & Q(show_to_sender=False))
+            qs = qs.exclude(Q(receiver=loguser) & Q(show_to_receiver=False))
+            #Slice
             qs = qs.exclude(sender=F("receiver"))[(page-1)*limit:page*limit]
 
         except self.user_model.DoesNotExist:
