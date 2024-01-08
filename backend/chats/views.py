@@ -65,6 +65,9 @@ class getopenchats(APIView): #Gets all the open chats of an user
         loguser = request.user
 
         chats = Chat.objects.filter(Q(user_one=loguser) | Q(user_two=loguser))
+        #Exclude hidden chats
+        chats = chats.exclude(Q(user_one=loguser) & Q(show_to_user_one=False))
+        chats = chats.exclude(Q(user_two=loguser) & Q(show_to_user_two=False))
 
         if not chats:
             return JsonResponse({'status':f'User "{loguser.username}" does not have any open chat.'},status=404)
