@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import MobileMenu from "./MobileMenu";
 import AuthContext from "../context/AuthContext";
 import NewPost from "./NewPost";
@@ -18,6 +18,7 @@ function Layout() {
   const { user, logoutUser } = useContext(AuthContext);
   const [newPost, setNewPost] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
   let iconSize = "30px";
 
   useEffect(() => {
@@ -31,7 +32,11 @@ function Layout() {
 
   return (
     <div
-      className="lg:grid grid-cols-[2fr,5fr,2.5fr] lg:max-w-[1900px] lg:mx-auto"
+      className={`lg:grid ${
+        location.pathname.includes("messages")
+          ? "grid-cols-[2fr,7.5fr]"
+          : "grid-cols-[2fr,5fr,2.5fr]"
+      } lg:max-w-[1900px] lg:mx-auto`}
       onClick={({ target }) => {
         if (target.classList.contains("mobileProfile")) {
           setMobileOpen((e) => !e);
@@ -54,7 +59,7 @@ function Layout() {
               {user && (
                 <>
                   <li>
-                    <Link>
+                    <Link to={"/messages"}>
                       <FiMessageSquare className="inline mr-4" size={"25px"} />
                       Messages
                     </Link>
@@ -125,9 +130,9 @@ function Layout() {
         >
           <FiEdit size={iconSize} color="white" />
         </button>
-        <button>
+        <Link to={"/messages"}>
           <FiMessageSquare size={iconSize} color="#908f94" />
-        </button>
+        </Link>
         <div className="relative">
           <MobileMenu isOpen={mobileOpen} />
           <img

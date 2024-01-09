@@ -10,6 +10,8 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import Layout from "./components/Layout";
 
 import { AuthProvider } from "./context/AuthContext";
+import { WebSocketProvider } from "./context/WebSocket";
+import Chats from "./pages/Chats";
 
 const queryClient = new QueryClient();
 
@@ -23,7 +25,13 @@ function App() {
             <Route path="/confirmed-email/:user" element={<ConfirmedEmail />} />
             <Route path="/register" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
-            <Route element={<Layout />}>
+            <Route
+              element={
+                <WebSocketProvider>
+                  <Layout />
+                </WebSocketProvider>
+              }
+            >
               <Route path="/" element={<Home />} />
               <Route
                 path="/profile/:username"
@@ -33,6 +41,7 @@ function App() {
                 path="/profile/"
                 element={<Profile key={"userProfile"} />}
               />
+              <Route path="/messages/" element={<Chats />} />
             </Route>
           </Routes>
         </QueryClientProvider>

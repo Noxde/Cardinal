@@ -1,0 +1,17 @@
+[data-sender="own"] {
+    margin-top: 20px;
+    align-self: flex-end;
+}
+
+[data-sender="chat"] {
+    margin-top: 20px;
+    align-self: flex-start;
+}
+
+[data-sender="own"] + [data-sender="own"] {
+    margin-top: 5px;
+}
+
+[data-sender="chat"] + [data-sender="chat"] {
+    margin-top: 5px;
+}

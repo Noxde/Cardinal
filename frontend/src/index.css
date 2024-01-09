@@ -65,3 +65,7 @@ input:-webkit-autofill:active {
 .input-error {
   @apply border-[#fb7373] focus:border-[#fb7373] border-[2px] focus:ring-transparent;
 }
+
+.dark-blue {
+  color: #0d162a;
+}
