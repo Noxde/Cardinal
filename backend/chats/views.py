@@ -50,6 +50,7 @@ class createchat(APIView): #Creates a Chat object
             if (user_one==user_two):
                 return JsonResponse({'status':'Chat creation avoided: "username_two" cannot be the same as the authenticated user.'},status=400)
             chat = Chat.objects.filter(Q(user_one=user_one) | Q(user_one=user_two))
+            chat = Chat.objects.exclude(user_one=F('user_two'))
             chat = chat.get(Q(user_two=user_one) | Q(user_two=user_two))
 
         except (self.user_model.DoesNotExist, Chat.DoesNotExist, Chat.MultipleObjectsReturned) as error:
@@ -61,9 +62,9 @@ class createchat(APIView): #Creates a Chat object
                 return JsonResponse(ChatSerializer(chat,context={'loguser':user_one}).data,status=201)
             
             elif isinstance(error, Chat.MultipleObjectsReturned):
-                return JsonResponse({'status':'MultipleObjectsReturned, Chat creation avoided.'},status=200)
+                return JsonResponse({'status':'MultipleObjectsReturned, Chat creation avoided.'},status=400)
             
-        return JsonResponse({'status':'Chat already exists.'},status=200)
+        return JsonResponse({'status':'Chat already exists.'},status=400)
     
 class getopenchats(APIView): #Gets all the open chats of an user
     permission_classes = [IsAuthenticated]
