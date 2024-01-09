@@ -46,6 +46,9 @@ class createchat(APIView): #Creates a Chat object
 
         try:
             user_two = self.user_model.objects.get(username=username_two)
+            #Avoid creating a chat with the same user_one and user_two
+            if (user_one==user_two):
+                return JsonResponse({'status':'Chat creation avoided: "username_two" cannot be the same as the authenticated user.'},status=400)
             chat = Chat.objects.filter(Q(user_one=user_one) | Q(user_one=user_two))
             chat = chat.get(Q(user_two=user_one) | Q(user_two=user_two))
 
