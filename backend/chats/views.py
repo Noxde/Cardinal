@@ -108,3 +108,50 @@ class deletemessage(APIView): #Deletes a message
                 return JsonResponse({'status':f'Id "{messageid}" does not match any message sent by user "{user.username}".'}, status=404)
         else:
             return JsonResponse({'status':'Missing Parameter: messageid.'}, status=400)
+
+class deletechat(APIView): #Deletes a chat
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        loguser = request.user
+        chatid = request.data.get('chatid',False)
+
+        if chatid:
+            try:
+                chat = Chat.objects.get(Q(id=chatid),Q(user_one=loguser) | Q(user_two=loguser))
+                #Hide the chat from the loguser and get the second user of the chat
+                if chat.user_one==loguser:
+                    chat.show_to_user_one = False
+                    chatuser = chat.user_two
+                else:
+                    chat.show_to_user_two = False
+                    chatuser = chat.user_one
+                
+                #Delete the chat if its hiden from both users
+                if (chat.show_to_user_one==False) and (chat.show_to_user_two==False):
+                    chat.delete()
+                else:
+                    chat.save()
+                
+                #Get all messages of the chat
+                qs = Message.objects.filter(Q(sender=loguser) | Q(sender=chatuser))
+                qs = qs.filter(Q(receiver=loguser) | Q(receiver=chatuser))
+                #Exclude messages with equal sender and receiver
+                qs = qs.exclude(sender=F("receiver"))
+                #Hide messages from loguser. Delete messages that are hidden for both users
+                for instance in qs:
+                    if instance.sender==loguser:
+                        instance.show_to_sender = False
+                    else:
+                        instance.show_to_receiver = False
+                    
+                    if (instance.show_to_sender==False) and (instance.show_to_receiver==False):
+                        instance.delete()
+                    else:
+                        instance.save()
+                
+                return JsonResponse({'status':'Chat Deleted Successfully.'}, status=200)
+            except Chat.DoesNotExist:
+                return JsonResponse({'status':f'User "{loguser.username}" does not have any chat with id "{chatid}".'}, status=404)
+        else:
+            return JsonResponse({'status':'Missing Parameter: "chatid".'}, status=400)
