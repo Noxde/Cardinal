@@ -52,6 +52,17 @@ class createchat(APIView): #Creates a Chat object
             chat = Chat.objects.filter(Q(user_one=user_one) | Q(user_one=user_two))
             chat = Chat.objects.exclude(user_one=F('user_two'))
             chat = chat.get(Q(user_two=user_one) | Q(user_two=user_two))
+            #If the chat already exist but its hidden from user_one then make it visible
+            was_hidden = False
+            if (chat.user_one==user_one) and (chat.show_to_user_one==False):
+                chat.show_to_user_one = True
+                was_hidden = True
+            elif (chat.user_two==user_one) and (chat.show_to_user_two==False):
+                chat.show_to_user_two = True
+                was_hidden = True
+            if was_hidden:
+                chat.save()
+                return JsonResponse(ChatSerializer(chat,context={'loguser':user_one}).data,status=200)
 
         except (self.user_model.DoesNotExist, Chat.DoesNotExist, Chat.MultipleObjectsReturned) as error:
             if isinstance(error, self.user_model.DoesNotExist):
