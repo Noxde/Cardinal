@@ -3,6 +3,7 @@ import "./messages.css";
 import { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
+import useWindowDimensions from "../../utils/useWindowDimensions";
 
 import AuthContext from "../../context/AuthContext";
 import WebSocketContext from "../../context/WebSocket";
@@ -12,7 +13,7 @@ import ChatItem from "./ChatItem";
 import NoChats from "./NoChats";
 import Followers from "./Followers";
 
-import { FiPlusCircle } from "react-icons/fi";
+import { FiPlusCircle, FiArrowLeft } from "react-icons/fi";
 
 function Chats() {
   const api = useAxios();
@@ -27,6 +28,7 @@ function Chats() {
   const [openchat, setOpenChat] = useState(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const { width } = useWindowDimensions();
 
   useEffect(() => {
     if (!authTokens) {
@@ -63,8 +65,8 @@ function Chats() {
   );
 
   return (
-    <div className="h-full grid grid-cols-[1fr,1.5fr] bg-white">
-      <div id="chats" className="border-r">
+    <div className="h-full md:grid grid-cols-[1fr,1.5fr] bg-white">
+      <div id="chats" className={`border-r md:block ${openchat && "hidden"}`}>
         <div className="header flex justify-between items-center px-4 py-6 Gelion-Medium dark-blue border-b">
           <span>Chats</span>{" "}
           <FiPlusCircle
@@ -100,11 +102,21 @@ function Chats() {
           />
         )}
       </div>
-      <div id="openchat">
+      <div id="openchat" className={`hidden md:block ${openchat && "!block"}`}>
         {openchat ? (
           <>
             {/* Chat header */}
             <div className="px-4 py-4 Gelion-Medium dark-blue border-b">
+              {/* Only shows on mobile, needed to backout from a chat */}
+              {width < 768 && (
+                <FiArrowLeft
+                  onClick={() => {
+                    setOpenChat(null);
+                  }}
+                  size={"20px"}
+                  className="mr-2 inline cursor-pointer"
+                />
+              )}
               <img
                 src={openchat.chat_user.profileimg}
                 width={"41px"}
@@ -114,28 +126,29 @@ function Chats() {
               {openchat.chat_user.username}
             </div>
             {/* Chat (could be a separate component) */}
-            <div>
-              {/* Chat messages */}
-              <div
-                id="messages"
-                className="flex flex-col overflow-scroll h-[calc(100vh-(73px+43px))] p-4"
-              >
-                {messages.map((x) => (
-                  // #TODO: Message component with custom context menu
-                  <div
-                    ref={chatRef}
-                    className={`message max-w-xs p-2 rounded-2xl ${
-                      x.receiver !== user.id
-                        ? "bg-[#4558ff] text-white rounded-br-none"
-                        : "bg-[hsl(234,100%,97%)] rounded-tl-none"
-                    }`}
-                    key={x.id}
-                    data-sender={x.receiver !== user.id ? "own" : "chat"}
-                  >
-                    {x.content}
-                  </div>
-                ))}
-              </div>
+            {/* Chat messages */}
+            <div
+              id="messages"
+              className="flex flex-col overflow-scroll lg:h-[calc(100vh-(73px+45px))] p-4 md:h-[calc(100vh-15rem)] h-[calc(100vh-15rem)]"
+            >
+              {messages.map((x) => (
+                // #TODO: Message component with custom context menu
+                <div
+                  ref={chatRef}
+                  className={`message max-w-xs p-2 rounded-2xl ${
+                    x.receiver !== user.id
+                      ? "bg-[#4558ff] text-white rounded-br-none"
+                      : "bg-[hsl(234,100%,97%)] rounded-tl-none"
+                  }`}
+                  key={x.id}
+                  data-sender={x.receiver !== user.id ? "own" : "chat"}
+                >
+                  {x.content}
+                </div>
+              ))}
+            </div>
+            {/* Input */}
+            <div className="flex">
               <input
                 onChange={(e) => {
                   setMessage(e.target.value);
@@ -144,7 +157,7 @@ function Chats() {
                 type="text"
                 name="message"
                 id="msg"
-                className="w-auto"
+                className="w-full"
               />
               <button
                 onClick={() => {
