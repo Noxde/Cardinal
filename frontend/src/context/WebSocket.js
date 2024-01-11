@@ -11,29 +11,32 @@ export const WebSocketProvider = ({ children }) => {
   const { authTokens } = useContext(AuthContext);
 
   useEffect(() => {
-    const ws = new WebSocket(
-      "ws://localhost:8000/ws/chats/",
-      authTokens.access
-    );
+    // Avoid crashing when token expires
+    if (authTokens) {
+      const ws = new WebSocket(
+        "ws://localhost:8000/ws/chats/",
+        authTokens.access
+      );
 
-    ws.onopen = () => {
-      console.log("WebSocket connected.");
-      setWebSocketS(ws);
-    };
-    ws.onclose = () => {
-      console.log("WebSocket disconnected.");
-      setWebSocketS(null);
-    };
-    ws.onerror = (err) => {
-      console.log(err);
-    };
-    ws.onmessage = ({ data }) => {
-      setLastMessage(JSON.parse(data));
-    };
+      ws.onopen = () => {
+        console.log("WebSocket connected.");
+        setWebSocketS(ws);
+      };
+      ws.onclose = () => {
+        console.log("WebSocket disconnected.");
+        setWebSocketS(null);
+      };
+      ws.onerror = (err) => {
+        console.log(err);
+      };
+      ws.onmessage = ({ data }) => {
+        setLastMessage(JSON.parse(data));
+      };
 
-    return () => {
-      ws.close();
-    };
+      return () => {
+        ws.close();
+      };
+    }
   }, []);
 
   function close() {
@@ -49,12 +52,14 @@ export const WebSocketProvider = ({ children }) => {
    * @param {String} msg Message
    */
   function sendMessage(dest, msg) {
-    WebSocketS.send(
-      JSON.stringify({
-        content: msg,
-        receiver: dest,
-      })
-    );
+    if (WebSocketS) {
+      WebSocketS.send(
+        JSON.stringify({
+          content: msg,
+          receiver: dest,
+        })
+      );
+    }
   }
 
   return (
