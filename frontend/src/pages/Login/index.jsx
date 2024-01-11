@@ -21,9 +21,16 @@ function Login() {
 
   useEffect(() => {
     if (location.state) {
-      formik.values.id = location.state.username;
-      document.querySelector("input[name='id']").value =
-        location.state.username;
+      if (location.state?.username) {
+        formik.values.id = location.state.username;
+        document.querySelector("input[name='id']").value =
+          location.state.username;
+      } else {
+        toast.error("Session expired", {
+          closeOnClick: true,
+          toastId: "expired",
+        });
+      }
     }
   }, []);
 
@@ -55,7 +62,7 @@ function Login() {
         });
       } catch (err) {
         let errorMessage = err?.response.data.status;
-        if(errorMessage) {
+        if (errorMessage) {
           return toast.update("signin", {
             type: "error",
             isLoading: false,
@@ -63,15 +70,11 @@ function Login() {
             closeOnClick: true,
             closeButton: true,
             draggable: true,
-            render: (
-              <p>
-                {errorMessage}{" "}
-              </p>
-            ),
-            onClose: () => setDisableSign(false)
+            render: <p>{errorMessage} </p>,
+            onClose: () => setDisableSign(false),
           });
         }
-        
+
         if (err.response.status === 403) {
           return toast.update("signin", {
             type: "error",
