@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
 import MobileMenu from "./MobileMenu";
 import AuthContext from "../context/AuthContext";
 import NewPost from "./NewPost";
@@ -28,6 +28,10 @@ function Layout() {
   function handlePost() {
     setNewPost(true);
     document.body.style.overflow = "hidden";
+  }
+
+  if (!user) {
+    return <Navigate to="/login/" state={{ expired: true }} />;
   }
 
   return (
