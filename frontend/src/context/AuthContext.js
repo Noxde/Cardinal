@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
         // Update tokens cookie
         document.cookie = `authTokens=${JSON.stringify(
           res.data
-        )};expires=${expires.toUTCString()};`;
+        )};expires=${expires.toUTCString()};path=/`;
 
         localStorage.setItem("user", JSON.stringify(data));
       }, 1000);
