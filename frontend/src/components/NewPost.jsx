@@ -66,7 +66,7 @@ function NewPost({ setNewPost }) {
           />
         </div>
         {imgPreview && (
-          <div className="max-h-[700px] w-fit max-w-[500px] rounded-xl overflow-hidden ml-[66px] mt-4">
+          <div className="max-h-[calc(200px+25vh)] overflow-y-scroll w-fit max-w-[500px] rounded-xl ml-[66px] mt-4">
             <img
               src={imgPreview}
               alt="post preview"
