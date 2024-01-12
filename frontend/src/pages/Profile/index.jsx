@@ -125,7 +125,7 @@ function Profile() {
         {/* banner image */}
 
         <img
-          src={userProfile?.banner || user?.banner}
+          src={userProfile ? userProfile.banner : user?.banner}
           alt=""
           className="h-64 w-full max-w-none object-cover -mb-6 lg:mb-0"
         />
@@ -133,11 +133,7 @@ function Profile() {
         {/* Profile picture */}
         <div className="relative flex-1 bg-white rounded-t-[1.7rem] lg:rounded-none shadow-[0px_-50px_70px_0px_rgba(0,0,0,0.5)]">
           <img
-            src={
-              userProfile?.profileimg ||
-              user?.profileimg ||
-              "/assets/profile_placeholder.png"
-            }
+            src={userProfile?.profileimg || user?.profileimg}
             width={"100px"}
             alt="Profile"
             className={`absolute object-cover left-1/2 aspect-square -translate-x-1/2 -top-12 bg-gray-200 border-4 border-white rounded-full
@@ -161,7 +157,9 @@ function Profile() {
               />
             </div>
             <ProfileInfo userProfile={userProfile || user} />
-            <p className="about">{userProfile?.about || user?.about}</p>
+            <p className="about">
+              {userProfile ? userProfile.about : user.about}
+            </p>
           </div>
           <div className="selector flex justify-evenly my-4 py-4 border-y border-[#e6e6e6]">
             <button className="text-[#4558ff] Gelion-Medium">Posts</button>
