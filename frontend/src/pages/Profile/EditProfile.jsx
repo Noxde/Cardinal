@@ -8,7 +8,7 @@ function EditProfile({ user, setUser, setEditProfile }) {
   const api = useAxios();
   const [newProfile, setNewProfile] = useState({});
   const [preview, setPreview] = useState({
-    profileimg: user.profileimg || "/assets/profile_placeholder.png",
+    profileimg: user.profileimg,
     banner: user.banner,
     about: user.about,
   });

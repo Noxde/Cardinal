@@ -53,7 +53,7 @@ function NewPost({ setNewPost }) {
           <img
             className="rounded-full object-cover aspect-square mr-4"
             width={"50px"}
-            src={user.profileimg || "/assets/profile_placeholder.png"}
+            src={user.profileimg}
             alt=""
           />
           <textarea

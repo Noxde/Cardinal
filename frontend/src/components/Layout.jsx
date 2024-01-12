@@ -103,7 +103,7 @@ function Layout() {
               className="flex items-center hover:bg-gray-100 px-4 py-[0.5rem] rounded-full transition-all "
             >
               <img
-                src={user.profileimg || "/assets/profile_placeholder.png"}
+                src={user.profileimg}
                 width="40px"
                 alt=""
                 className="rounded-full object-cover mr-4 aspect-square"
@@ -140,7 +140,7 @@ function Layout() {
         <div className="relative">
           <MobileMenu isOpen={mobileOpen} />
           <img
-            src={user?.profileimg || "/assets/profile_placeholder.png"}
+            src={user.profileimg}
             width={iconSize}
             alt="profile placeholder"
             className="mobileProfile rounded-full object-cover aspect-square"

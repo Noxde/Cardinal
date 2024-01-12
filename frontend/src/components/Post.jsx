@@ -160,7 +160,7 @@ function Post({
       <div className="flex items-start p-4 last:border-none border-b-2 border-[#dcdcdc]">
         <Link to={`/profile/${author.username}`}>
           <img
-            src={author.profileimg || "/assets/profile_placeholder.png"}
+            src={author.profileimg}
             className="rounded-full aspect-square object-cover mr-6"
             width={"50px"}
             alt=""
