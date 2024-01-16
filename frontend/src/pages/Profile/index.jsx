@@ -46,39 +46,30 @@ function Profile() {
   });
 
   // Only if its not /profile
-  const { isLoading, isError, error } = useQuery(
-    "userProfile",
-    () => instance.get(`/getpublicprofile/${username}/`),
-    {
-      enabled: !username && user ? false : true,
-      retry: false,
-      refetchOnWindowFocus: false,
-      cacheTime: 1000,
-      onSuccess: ({ data: userInfo }) => {
-        setUserProfile(userInfo);
-        setIsFollowed(
-          userInfo.followers.find((x) => x.username === user.username)
-            ? true
-            : false
-        );
-      },
-    }
-  );
+  const { isLoading, isError, error } = useQuery({
+    queryKey: "userProfile",
+    queryFn: () => instance.get(`/getpublicprofile/${username}/`),
+    enabled: !username && user ? false : true,
+    onSuccess: ({ data: userInfo }) => {
+      setUserProfile(userInfo);
+      setIsFollowed(
+        userInfo.followers.find((x) => x.username === user.username)
+          ? true
+          : false
+      );
+    },
+  });
 
   // Get user posts
-  const { postsLoading, postsIsError, postsError } = useQuery(
-    "userPosts",
-    () => api.get(`getpost/profile/${username || user.username}/True/`),
-    {
-      enabled: (!username && user) || (username && user) ? true : false,
-      retry: false,
-      refetchOnWindowFocus: false,
-      cacheTime: 1000,
-      onSuccess: ({ data: userPosts }) => {
-        setPosts(Object.entries(userPosts).map((x) => x[1]));
-      },
-    }
-  );
+  const { postsLoading, postsIsError, postsError } = useQuery({
+    queryKey: "userPosts",
+    queryFn: () =>
+      api.get(`getpost/profile/${username || user.username}/True/`),
+    enabled: (!username && user) || (username && user) ? true : false,
+    onSuccess: ({ data: userPosts }) => {
+      setPosts(Object.entries(userPosts).map((x) => x[1]));
+    },
+  });
   // Infinite scroll
   useEffect(() => {
     async function fetchMore() {
