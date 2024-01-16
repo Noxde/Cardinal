@@ -24,7 +24,6 @@ function Chats() {
 
   const chatRef = useRef();
   const [showFollowers, setShowFollowers] = useState(false);
-  const [chats, setChats] = useState([]);
   const [openchat, setOpenChat] = useState(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -51,18 +50,10 @@ function Chats() {
     chatRef.current?.scrollIntoView();
   }, [messages]);
 
-  const { isLoading, isError, error } = useQuery(
-    "getOpenChats",
-    () => api.get("/getopenchats/"),
-    {
-      retry: false,
-      refetchOnWindowFocus: false,
-      cacheTime: 60 * 1000,
-      onSuccess: ({ data }) => {
-        setChats(data);
-      },
-    }
-  );
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: "openChats",
+    queryFn: () => api.get("/getopenchats/"),
+  });
 
   return (
     <div className="h-full md:grid grid-cols-[1fr,1.5fr] bg-white">
@@ -77,8 +68,9 @@ function Chats() {
             size={"25px"}
           />
         </div>
-        {chats.length > 0 ? (
-          chats.map((x) => (
+        {/* Check if the request is loading or if there are no open chats */}
+        {data?.data.length > 0 ? (
+          data?.data.map((x) => (
             <ChatItem
               key={x.id}
               username={x.chat_user.username}
@@ -97,7 +89,7 @@ function Chats() {
             setOpenChat={setOpenChat}
             setShowFollowers={setShowFollowers}
             followers={user.followers}
-            chats={chats}
+            chats={data?.data}
             currentChat={openchat}
           />
         )}
