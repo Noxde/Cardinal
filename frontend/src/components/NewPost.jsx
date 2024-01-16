@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import { BiLeftArrowAlt } from "react-icons/bi";
 import { BsImageFill } from "react-icons/bs";
 import AuthContext from "../context/AuthContext";
@@ -11,8 +11,8 @@ function NewPost({ setNewPost }) {
 
   const { user } = useContext(AuthContext);
   const [post, setPost] = useState(null);
-
   const [imgPreview, setimgPreview] = useState(null);
+  const inputRef = useRef();
 
   async function handlePost() {
     await api.post("/createpost/", post, {
@@ -46,6 +46,10 @@ function NewPost({ setNewPost }) {
     };
   }
 
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
     <Modal setIsOpen={setNewPost}>
       <div className="flex flex-col p-4 ">
@@ -63,6 +67,7 @@ function NewPost({ setNewPost }) {
             onInput={handleTextArea}
             rows={1}
             cols={35}
+            ref={inputRef}
           />
         </div>
         {imgPreview && (
