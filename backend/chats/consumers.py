@@ -43,7 +43,7 @@ class ChatConsumer(AsyncWebsocketConsumer,JWTAuthentication):
 
         try:
             # Saves the message in the database
-            receiver = await database_sync_to_async(self.user_model.objects.get)(username=text_data_json["receiver"])
+            receiver = await database_sync_to_async(self.user_model.objects.get)(id=text_data_json["receiver"])
             await database_sync_to_async(Message.objects.create)(content=text_data_json["content"],sender=self.user,receiver=receiver)
 
             # Send message to room group

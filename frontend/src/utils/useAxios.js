@@ -30,7 +30,7 @@ const useAxios = () => {
     let expires = new Date(Number(`${userToken.exp}000`));
     document.cookie = `authTokens=${JSON.stringify(
       response.data
-    )};expires=${expires}`;
+    )};expires=${expires};path=/`;
     // localStorage.setItem("authTokens", JSON.stringify(response.data));
     setAuthTokens(response.data);
 

@@ -13,7 +13,13 @@ import { AuthProvider } from "./context/AuthContext";
 import { WebSocketProvider } from "./context/WebSocket";
 import Chats from "./pages/Chats";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnMount: false,
+    },
+  },
+});
 
 function App() {
   return (

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import { BiLeftArrowAlt } from "react-icons/bi";
 import { BsImageFill } from "react-icons/bs";
 import AuthContext from "../context/AuthContext";
@@ -11,8 +11,8 @@ function NewPost({ setNewPost }) {
 
   const { user } = useContext(AuthContext);
   const [post, setPost] = useState(null);
-
   const [imgPreview, setimgPreview] = useState(null);
+  const inputRef = useRef();
 
   async function handlePost() {
     await api.post("/createpost/", post, {
@@ -46,6 +46,10 @@ function NewPost({ setNewPost }) {
     };
   }
 
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
     <Modal setIsOpen={setNewPost}>
       <div className="flex flex-col p-4 ">
@@ -53,7 +57,7 @@ function NewPost({ setNewPost }) {
           <img
             className="rounded-full object-cover aspect-square mr-4"
             width={"50px"}
-            src={user.profileimg || "/assets/profile_placeholder.png"}
+            src={user.profileimg}
             alt=""
           />
           <textarea
@@ -63,10 +67,11 @@ function NewPost({ setNewPost }) {
             onInput={handleTextArea}
             rows={1}
             cols={35}
+            ref={inputRef}
           />
         </div>
         {imgPreview && (
-          <div className="max-h-[700px] w-fit max-w-[500px] rounded-xl overflow-hidden ml-[66px] mt-4">
+          <div className="max-h-[calc(200px+25vh)] overflow-y-scroll w-fit max-w-[500px] rounded-xl ml-[66px] mt-4">
             <img
               src={imgPreview}
               alt="post preview"

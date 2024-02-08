@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
 import MobileMenu from "./MobileMenu";
 import AuthContext from "../context/AuthContext";
 import NewPost from "./NewPost";
@@ -28,6 +28,10 @@ function Layout() {
   function handlePost() {
     setNewPost(true);
     document.body.style.overflow = "hidden";
+  }
+
+  if (!user) {
+    return <Navigate to="/login/" state={{ expired: true }} />;
   }
 
   return (
@@ -99,7 +103,7 @@ function Layout() {
               className="flex items-center hover:bg-gray-100 px-4 py-[0.5rem] rounded-full transition-all "
             >
               <img
-                src={user.profileimg || "/assets/profile_placeholder.png"}
+                src={user.profileimg}
                 width="40px"
                 alt=""
                 className="rounded-full object-cover mr-4 aspect-square"
@@ -136,7 +140,7 @@ function Layout() {
         <div className="relative">
           <MobileMenu isOpen={mobileOpen} />
           <img
-            src={user?.profileimg || "/assets/profile_placeholder.png"}
+            src={user.profileimg}
             width={iconSize}
             alt="profile placeholder"
             className="mobileProfile rounded-full object-cover aspect-square"

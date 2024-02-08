@@ -8,49 +8,43 @@ function EditProfile({ user, setUser, setEditProfile }) {
   const api = useAxios();
   const [newProfile, setNewProfile] = useState({});
   const [preview, setPreview] = useState({
-    profileimg: user.profileimg || "/assets/profile_placeholder.png",
+    profileimg: user.profileimg,
     banner: user.banner,
     about: user.about,
   });
   const [loading, setLoading] = useState(false);
 
-  /*
-    Puedo no refrescar la pagina para actualizar los cambios
-    tengo que solucionar que no se actualice en el perfil en si
-    culpa del state userProfile
-  */
   async function handleSave() {
-    console.log(newProfile);
     if (newProfile.about === "") newProfile.about = " ";
     await api.post("/moduserinfo/", newProfile, {
       headers: {
         "content-type": "multipart/form-data",
       },
     });
-    // const { data } = await api.get("/getuserinfo/");
+
     localStorage.setItem(
       "user",
       JSON.stringify({
         ...user,
+        about: preview.about,
         profileimg: preview.profileimg,
         banner: preview.banner,
       })
     );
     setUser({
       ...user,
+      about: preview.about,
       profileimg: preview.profileimg,
       banner: preview.banner,
     });
     setEditProfile(false);
-    // window.location.reload();
+    document.body.style.overflow = "auto";
   }
 
   async function handlePreview(e) {
     const isBanner = e.target.id.includes("Banner");
     const file = e.target.files[0];
     const reader = new FileReader();
-
-    console.log(file);
 
     reader.readAsDataURL(file);
     reader.onload = () => {
@@ -80,7 +74,6 @@ function EditProfile({ user, setUser, setEditProfile }) {
       setIsOpen={setEditProfile}
     >
       {/* Content */}
-
       <label htmlFor="uploadBanner" className="relative block cursor-pointer">
         <div className="absolute grid place-items-center inset-0 opacity-0 hover:opacity-100 bg-[rgba(0,0,0,0.5)]">
           <TfiPencil color="#c1c1c1" size={"25px"} />
