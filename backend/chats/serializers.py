@@ -23,12 +23,14 @@ class ChatSerializer(serializers.ModelSerializer): #Serializer for open chats
     def get_chat_user(self, chat):
         loguser = self.context.get("loguser")
         try:
-            if loguser==chat.user_one:
+            if loguser.id==chat.user_one_id:
+                id = chat.user_two_id
                 chat_user=chat.user_two
             else:
+                id = chat.user_one_id
                 chat_user=chat.user_one
         except get_user_model().DoesNotExist:
-            chat_user = get_user_model().get_unknown_user()
+            chat_user = get_user_model().get_unknown_user(id)
 
         profileimgurl = NGINX_DOMAIN+MEDIA_URL+chat_user.profileimg.name if chat_user.profileimg else '' 
         

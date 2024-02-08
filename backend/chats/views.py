@@ -18,16 +18,17 @@ class getchat(APIView): #Returns the messages from a chat
 
         try:
             chatuser = self.user_model.objects.get(username=chat)
-            qs = Message.objects.filter(Q(sender=loguser) | Q(sender=chatuser))
-            qs = qs.filter(Q(receiver=loguser) | Q(receiver=chatuser)).order_by('id')
-            #Exclude hidden messages
-            qs = qs.exclude(Q(sender=loguser) & Q(show_to_sender=False))
-            qs = qs.exclude(Q(receiver=loguser) & Q(show_to_receiver=False))
-            #Slice
-            qs = qs.exclude(sender=F("receiver"))[(page-1)*limit:page*limit]
 
         except self.user_model.DoesNotExist:
-            return JsonResponse({'status':f'Username "{chat}" does not match any user.'},status=400)
+            chatuser = get_user_model().get_unknown_user(chat)
+        
+        qs = Message.objects.filter(Q(sender=loguser) | Q(sender=chatuser.id))
+        qs = qs.filter(Q(receiver=loguser) | Q(receiver=chatuser.id)).order_by('id')
+        #Exclude hidden messages
+        qs = qs.exclude(Q(sender=loguser) & Q(show_to_sender=False))
+        qs = qs.exclude(Q(receiver=loguser) & Q(show_to_receiver=False))
+        #Slice
+        qs = qs.exclude(sender=F("receiver"))[(page-1)*limit:page*limit]
 
         if not qs:
             return JsonResponse({'status':f'Failed to match any message on page={page} of chat="{chat}" with limit={limit}.'},status=404) 
