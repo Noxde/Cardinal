@@ -44,6 +44,8 @@ class User(AbstractUser):     #Custom user model
         self.banner.delete(save=False)
         super().delete(*args, **kwargs)
 
+    def get_unknown_user():
+        return User(id=0,username="unknown",email="unknown")
 
 class Emails(models.Model): #Keeps a log of all the emails sent to avoid spamming
     EMAILCONFIRMATION = 'EC'
@@ -80,4 +82,3 @@ class Emails(models.Model): #Keeps a log of all the emails sent to avoid spammin
             return True
         else:
             return False
-        
