@@ -1,12 +1,11 @@
 import "./messages.css";
 
-import { useContext, useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
 import useWindowDimensions from "../../utils/useWindowDimensions";
 
 import AuthContext from "../../context/AuthContext";
-import WebSocketContext from "../../context/WebSocket";
 
 import useAxios from "../../utils/useAxios";
 import ChatItem from "./ChatItem";
