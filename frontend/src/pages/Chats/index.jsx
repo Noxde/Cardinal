@@ -38,9 +38,19 @@ function Chats() {
 
   return (
     <div className="h-full md:grid grid-cols-[1fr,1.5fr] bg-white">
-      <div id="chats" className={`border-r md:block ${openchat && "hidden"}`}>
+      <div id="chats" className={`border-r md:block ${openChat && "hidden"}`}>
         <div className="header flex justify-between items-center px-4 py-6 Gelion-Medium dark-blue border-b">
-          <span>Chats</span>{" "}
+          <span className="flex items-center">
+            {width < 1024 && (
+              <Link to={"/"}>
+                <FiArrowLeft
+                  size={"20px"}
+                  className="inline mr-2 cursor-pointer"
+                />
+              </Link>
+            )}
+            Chats
+          </span>
           <FiPlusCircle
             onClick={() => {
               setShowFollowers(true);
