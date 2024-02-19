@@ -6,19 +6,12 @@ function ChatItem({
   profilePicture,
   lastMessage,
   setMessages,
-  setOpenChat,
+  onClick,
 }) {
   const api = useAxios();
 
-  async function handleClick() {
-    setOpenChat();
-    const { data } = await api.get(`/getchat/${username}/${1}/100`);
-
-    setMessages(data);
-  }
-
   return (
-    <div className="flex p-4 border-b cursor-pointer" onClick={handleClick}>
+    <div className="flex p-4 border-b cursor-pointer" onClick={onClick}>
       <img
         src={profilePicture}
         width={"40px"}

@@ -75,8 +75,7 @@ function Chats() {
               key={x.id}
               username={x.chat_user.username}
               profilePicture={x.chat_user.profileimg}
-              setMessages={setMessages}
-              setOpenChat={() => {
+              onClick={() => {
                 setOpenChat(x);
               }}
             />
