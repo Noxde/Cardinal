@@ -80,7 +80,7 @@ function Chats() {
             setShowFollowers={setShowFollowers}
             followers={user.followers}
             chats={data?.data}
-            currentChat={openchat}
+            currentChat={openChat}
           />
         )}
       </div>
