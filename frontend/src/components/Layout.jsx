@@ -118,7 +118,12 @@ function Layout() {
       {newPost && <NewPost setNewPost={setNewPost} />}
       <Outlet />
       <div className="hidden lg:block h-full bg-white border-l border-[#e6e6e6] z-30"></div>
-      <div className="lg:hidden flex py-2 px-1 items-center justify-around fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full w-[90%] bg-white shadow-[0px_4px_30px_-5px_rgba(0,0,0,0.2)]">
+      {/* Mobile nav */}
+      <div
+        className={`lg:hidden ${
+          location.pathname.includes("messages") && "hidden"
+        } flex py-2 px-1 items-center justify-around fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full w-[90%] bg-white shadow-[0px_4px_30px_-5px_rgba(0,0,0,0.2)]`}
+      >
         <Link to="/">
           <FiHome size={iconSize} color="#3e4fe5" />
         </Link>
