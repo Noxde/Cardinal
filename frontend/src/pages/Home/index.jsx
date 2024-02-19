@@ -18,6 +18,7 @@ function Home() {
     {
       enabled: user?.username ? true : false,
       retry: false,
+      refetchOnMount: true,
       refetchOnWindowFocus: false,
       cacheTime: 1000,
       onSuccess: ({ data: feedPosts }) => {
