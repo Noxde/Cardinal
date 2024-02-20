@@ -12,6 +12,8 @@ class getchat(APIView): #Returns the messages from a chat
     permission_classes = [IsAuthenticated]
 
     def get(self, request, chat, page, limit):
+        if limit==0:
+            return JsonResponse({'status':'Argument "limit" cannot be zero.'},status=400)
         loguser = request.user
         self.user_model = get_user_model()
         response = []
@@ -28,7 +30,14 @@ class getchat(APIView): #Returns the messages from a chat
         qs = qs.exclude(Q(sender=loguser) & Q(show_to_sender=False))
         qs = qs.exclude(Q(receiver=loguser) & Q(show_to_receiver=False))
         #Slice
-        qs = qs.exclude(sender=F("receiver"))[(page-1)*limit:page*limit]
+        requested_page = page
+        last_page = len(qs)/limit
+        page = last_page - page + 1
+        if (page<1) or (page>last_page): #Cheks if the requested page is valid
+            qs = False
+            page = requested_page
+        else:
+            qs = qs.exclude(sender=F("receiver"))[(page-1)*limit:page*limit]
 
         if not qs:
             return JsonResponse({'status':f'Failed to match any message on page={page} of chat="{chat}" with limit={limit}.'},status=404) 
