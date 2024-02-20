@@ -12,8 +12,12 @@ class getchat(APIView): #Returns the messages from a chat
     permission_classes = [IsAuthenticated]
 
     def get(self, request, chat, page, limit):
-        if limit==0:
-            return JsonResponse({'status':'Argument "limit" cannot be zero.'},status=400)
+        if limit<1:
+            return JsonResponse({'status':'Argument "limit" must be greater than 0.'},status=400)
+        
+        if page<1:
+            return JsonResponse({'status':'Argument "page" must be greater than 0.'},status=400)
+        
         loguser = request.user
         self.user_model = get_user_model()
         response = []
@@ -25,22 +29,17 @@ class getchat(APIView): #Returns the messages from a chat
             chatuser = get_user_model().get_unknown_user(chat)
         
         qs = Message.objects.filter(Q(sender=loguser) | Q(sender=chatuser.id))
-        qs = qs.filter(Q(receiver=loguser) | Q(receiver=chatuser.id)).order_by('id')
+        qs = qs.filter(Q(receiver=loguser) | Q(receiver=chatuser.id)).order_by('-id')
         #Exclude hidden messages
         qs = qs.exclude(Q(sender=loguser) & Q(show_to_sender=False))
         qs = qs.exclude(Q(receiver=loguser) & Q(show_to_receiver=False))
-        #Slice
-        requested_page = page
-        last_page = len(qs)/limit
-        page = last_page - page + 1
-        if (page<1) or (page>last_page): #Cheks if the requested page is valid
-            qs = False
-            page = requested_page
-        else:
-            qs = qs.exclude(sender=F("receiver"))[(page-1)*limit:page*limit]
+        messages_amount = len(qs)
+        pages_amount = (messages_amount / limit) + 1
 
-        if not qs:
+        if (not qs) or (page>pages_amount) or (limit<1):
             return JsonResponse({'status':f'Failed to match any message on page={page} of chat="{chat}" with limit={limit}.'},status=404) 
+
+        qs = qs.exclude(sender=F("receiver"))[(page-1)*limit:page*limit][::-1]
         
         for message in qs:
             response.append(MessageSerializer(message).data)
