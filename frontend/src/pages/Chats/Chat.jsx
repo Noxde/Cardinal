@@ -124,6 +124,19 @@ function Chat({ receiver, setOpenChat }) {
     }, 0);
   }
 
+  useEffect(() => {
+    let chat = chatRef.current;
+    if (messageMenu.isOpen) {
+      chatRef.current.style.overflow = "hidden";
+    } else {
+      chatRef.current.style.overflow = "scroll";
+    }
+
+    return () => {
+      chat.style.overflow = "scroll";
+    };
+  }, [messageMenu.isOpen]);
+
   return (
     <>
       {/* Chat header */}
