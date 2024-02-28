@@ -6,6 +6,7 @@ import { FiArrowLeft } from "react-icons/fi";
 import WebSocketContext from "../../context/WebSocket";
 import useAxios from "../../utils/useAxios";
 import Message from "./Message";
+import MessageMenu from "./MessageMenu";
 
 function Chat({ receiver, setOpenChat }) {
   const { lastMessage, sendMessage } = useContext(WebSocketContext);
@@ -17,6 +18,14 @@ function Chat({ receiver, setOpenChat }) {
   const [isIncomplete, setIsIncomplete] = useState(true);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [currentScroll, setCurrentScroll] = useState(null);
+  const [messageMenu, setMessageMenu] = useState({
+    pos: {
+      x: 0,
+      y: 0,
+    },
+    id: 0,
+    isOpen: false,
+  });
 
   const chatRef = useRef();
   const inputRef = useRef();
@@ -163,7 +172,13 @@ function Chat({ receiver, setOpenChat }) {
                 </div>
               ) : null}
             </div>
-
+            {messageMenu.isOpen && (
+              <MessageMenu
+                menu={messageMenu}
+                setMenu={setMessageMenu}
+                setMessages={setMessages}
+              />
+            )}
             {messages.map((x) => (
               <Message message={x} chatRef={chatRef} setMenu={setMessageMenu} />
             ))}
