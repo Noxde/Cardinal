@@ -3,12 +3,11 @@ import { useQuery } from "react-query";
 import { useInView } from "react-intersection-observer";
 import useWindowDimensions from "../../utils/useWindowDimensions";
 import { FiArrowLeft } from "react-icons/fi";
-import AuthContext from "../../context/AuthContext";
 import WebSocketContext from "../../context/WebSocket";
 import useAxios from "../../utils/useAxios";
+import Message from "./Message";
 
 function Chat({ receiver, setOpenChat }) {
-  const { user } = useContext(AuthContext);
   const { lastMessage, sendMessage } = useContext(WebSocketContext);
   const api = useAxios();
 
@@ -107,7 +106,7 @@ function Chat({ receiver, setOpenChat }) {
       {
         content: message,
         receiver: receiver.id,
-        id: user.username + message, // FIXME: Cambiar esto algo que siempre sea unico (puede ser un contador)
+        // id: Math.random() + message, // FIXME: Cambiar esto algo que siempre sea unico (puede ser un contador)
       },
     ]);
     setMessage("");
@@ -164,19 +163,9 @@ function Chat({ receiver, setOpenChat }) {
                 </div>
               ) : null}
             </div>
+
             {messages.map((x) => (
-              // TODO: Message component with custom context menu
-              <div
-                className={`message max-w-xs p-2 rounded-2xl ${
-                  x.receiver !== user.id
-                    ? "bg-[#4558ff] text-white rounded-br-none"
-                    : "bg-[hsl(234,100%,97%)] rounded-tl-none"
-                }`}
-                key={x.id}
-                data-sender={x.receiver !== user.id ? "own" : "chat"}
-              >
-                {x.content}
-              </div>
+              <Message message={x} chatRef={chatRef} setMenu={setMessageMenu} />
             ))}
           </>
         )}
