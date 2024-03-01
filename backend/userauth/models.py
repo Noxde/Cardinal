@@ -5,7 +5,7 @@ from .tokens import createToken
 from backend import settings
 from django.utils import timezone
 from django.core.validators import EmailValidator
-
+from django.apps import apps
 
 
 class User(AbstractUser):     #Custom user model
@@ -39,9 +39,20 @@ class User(AbstractUser):     #Custom user model
         return [field.name for field in User._meta.get_fields()]
     
     def delete(self, *args, **kwargs): #Deletes an user object, including related files
+        #Hide chats and messages belonging to the user
+        #Delete them if they are hidden from both users
+        #Use get_model() to avoid circular imports
+        Message = apps.get_model('chats', 'Message') 
+        Message.delete_user(self)
+        Chat = apps.get_model('chats', 'Chat')
+        Chat.delete_user(self)
+
+        #Delete related files
         if (self.profileimg.name!=settings.PROFILE_PLACEHOLDER_PATH):
             self.profileimg.delete(save=False)
         self.banner.delete(save=False)
+
+        #Continue with default delete process
         super().delete(*args, **kwargs)
 
     def get_unknown_user(id):
