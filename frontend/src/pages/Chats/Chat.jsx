@@ -3,12 +3,12 @@ import { useQuery } from "react-query";
 import { useInView } from "react-intersection-observer";
 import useWindowDimensions from "../../utils/useWindowDimensions";
 import { FiArrowLeft } from "react-icons/fi";
-import AuthContext from "../../context/AuthContext";
 import WebSocketContext from "../../context/WebSocket";
 import useAxios from "../../utils/useAxios";
+import Message from "./Message";
+import MessageMenu from "./MessageMenu";
 
 function Chat({ receiver, setOpenChat }) {
-  const { user } = useContext(AuthContext);
   const { lastMessage, sendMessage } = useContext(WebSocketContext);
   const api = useAxios();
 
@@ -18,6 +18,14 @@ function Chat({ receiver, setOpenChat }) {
   const [isIncomplete, setIsIncomplete] = useState(true);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [currentScroll, setCurrentScroll] = useState(null);
+  const [messageMenu, setMessageMenu] = useState({
+    pos: {
+      x: 0,
+      y: 0,
+    },
+    id: 0,
+    isOpen: false,
+  });
 
   const chatRef = useRef();
   const inputRef = useRef();
@@ -107,7 +115,7 @@ function Chat({ receiver, setOpenChat }) {
       {
         content: message,
         receiver: receiver.id,
-        id: user.username + message, // FIXME: Cambiar esto algo que siempre sea unico (puede ser un contador)
+        // id: Math.random() + message, // FIXME: Cambiar esto algo que siempre sea unico (puede ser un contador)
       },
     ]);
     setMessage("");
@@ -115,6 +123,19 @@ function Chat({ receiver, setOpenChat }) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }, 0);
   }
+
+  useEffect(() => {
+    let chat = chatRef.current;
+    if (messageMenu.isOpen) {
+      chatRef.current.style.overflow = "hidden";
+    } else {
+      chatRef.current.style.overflow = "scroll";
+    }
+
+    return () => {
+      chat.style.overflow = "scroll";
+    };
+  }, [messageMenu.isOpen]);
 
   return (
     <>
@@ -164,19 +185,15 @@ function Chat({ receiver, setOpenChat }) {
                 </div>
               ) : null}
             </div>
+            {messageMenu.isOpen && (
+              <MessageMenu
+                menu={messageMenu}
+                setMenu={setMessageMenu}
+                setMessages={setMessages}
+              />
+            )}
             {messages.map((x) => (
-              // TODO: Message component with custom context menu
-              <div
-                className={`message max-w-xs p-2 rounded-2xl ${
-                  x.receiver !== user.id
-                    ? "bg-[#4558ff] text-white rounded-br-none"
-                    : "bg-[hsl(234,100%,97%)] rounded-tl-none"
-                }`}
-                key={x.id}
-                data-sender={x.receiver !== user.id ? "own" : "chat"}
-              >
-                {x.content}
-              </div>
+              <Message message={x} chatRef={chatRef} setMenu={setMessageMenu} />
             ))}
           </>
         )}

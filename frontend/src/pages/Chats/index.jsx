@@ -64,8 +64,7 @@ function Chats() {
           data?.data.map((x) => (
             <ChatItem
               key={x.id}
-              username={x.chat_user.username}
-              profilePicture={x.chat_user.profileimg}
+              chat={x}
               onClick={() => {
                 setOpenChat(x);
               }}

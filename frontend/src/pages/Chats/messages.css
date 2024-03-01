@@ -1,17 +1,24 @@
 [data-sender="own"] {
-    margin-top: 20px;
+  margin-top: 20px;
+  align-self: flex-end;
+  @apply bg-[#4558ff] text-white rounded-br-none;
+
+  & span {
     align-self: flex-end;
+    @apply text-gray-200;
+  }
 }
 
 [data-sender="chat"] {
-    margin-top: 20px;
-    align-self: flex-start;
+  margin-top: 20px;
+  align-self: flex-start;
+  @apply bg-[#f0f1ff] rounded-tl-none;
 }
 
 [data-sender="own"] + [data-sender="own"] {
-    margin-top: 5px;
+  margin-top: 5px;
 }
 
 [data-sender="chat"] + [data-sender="chat"] {
-    margin-top: 5px;
+  margin-top: 5px;
 }
