@@ -23,7 +23,7 @@ class getchat(APIView): #Returns the messages from a chat
         response = []
 
         try:
-            chatuser = self.user_model.objects.get(username=chat)
+            chatuser = self.user_model.objects.get(id=chat)
 
         except self.user_model.DoesNotExist:
             chatuser = get_user_model().get_unknown_user(chat)
