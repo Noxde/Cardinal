@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from .models import Chat, Message
 from datetime import datetime,timezone,timedelta
 
@@ -33,7 +34,7 @@ class ChatTestCase(TestCase):
         self.chat.save()
         self.assertFalse(Chat.objects.get(id=self.chat.id).show_to_user_two)
 
-    def test_Chat_delete_ser(self):
+    def test_Chat_delete_user(self):
         """Chat.delete_user() is OK."""
         user1 = get_user_model().objects.create(username="James",email="James@cardinal.com")
         user2 = get_user_model().objects.create(username="Charles",email="Charles@cardinal.com")
@@ -86,3 +87,34 @@ class MessageTestCase(TestCase):
         self.message.show_to_receiver = False 
         self.message.save()
         self.assertFalse(Message.objects.get(id=self.message.id).show_to_receiver)
+
+    def test_Message_delete_user(self):
+        """Message.delete_user() is OK."""
+        user1 = get_user_model().objects.create(username="Lyla",email="Lyla@cardinal.com")
+        user2 = get_user_model().objects.create(username="Emily",email="Emily@cardinal.com")
+        
+        def get_messages():
+            messages = Message.objects.filter(Q(sender=user1) | Q(receiver=user1))
+            messages = messages.filter(Q(sender=user1) | Q(receiver=user1))
+            return messages
+
+        for i in range(5):
+            Message.objects.create(content=i,sender=user1,receiver=user2)
+            Message.objects.create(content=i,sender=user2,receiver=user1)
+        
+        for message in get_messages():
+            self.assertTrue(message.show_to_sender) 
+            self.assertTrue(message.show_to_receiver)
+
+        user1.delete() 
+        for message in get_messages():
+            if message.sender_id == user1.id:
+                self.assertFalse(message.show_to_sender) 
+                self.assertTrue(message.show_to_receiver)
+            else:
+                self.assertTrue(message.show_to_sender) 
+                self.assertFalse(message.show_to_receiver)
+        
+        user2.delete()
+        messages = get_messages()
+        self.assertFalse(messages)
