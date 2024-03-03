@@ -33,6 +33,21 @@ class ChatTestCase(TestCase):
         self.chat.save()
         self.assertFalse(Chat.objects.get(id=self.chat.id).show_to_user_two)
 
+    def test_Chat_delete_ser(self):
+        """Chat.delete_user() is OK."""
+        user1 = get_user_model().objects.create(username="James",email="James@cardinal.com")
+        user2 = get_user_model().objects.create(username="Charles",email="Charles@cardinal.com")
+        chat = Chat.objects.create(user_one=user1,user_two=user2)
+        self.assertTrue(chat.show_to_user_one)
+        self.assertTrue(chat.show_to_user_two)
+        user1.delete()
+        chat = Chat.objects.get(id=chat.id)
+        self.assertFalse(chat.show_to_user_one)
+        self.assertTrue(chat.show_to_user_two)
+        user2.delete()
+        self.assertFalse(Chat.objects.filter(id=chat.id))
+
+
 class MessageTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
