@@ -153,6 +153,15 @@ class UserTestCase(TestCase):
         test_user.delete()
         self.assertFalse(User.objects.filter(id=test_user.id))
         self.assertFalse(isfile(join(MEDIA_ROOT,"user",test_file.name)))
+    
+    def test_user_get_unknown_user(self):
+        """User.get_unknown_user() is OK."""
+        unknown_user = User.get_unknown_user(0)
+        self.assertEqual(unknown_user.id,0)
+        self.assertEqual(unknown_user.username,"unknown")
+        self.assertEqual(unknown_user.email,"unknown")
+        qs = User.objects.filter(id=0)
+        self.assertFalse(qs)
 
 
 class EmailsTestCase(TestCase):
