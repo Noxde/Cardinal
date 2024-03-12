@@ -129,3 +129,25 @@ class ViewsTestCase(TestCase):
         chat.save()
         self.assertEqual(c.get(f"/getopenchats/").json()["status"],
         'User "James" does not have any open chat.')
+    
+    def test_deletemessage(self):
+        """Deletemessage view is OK."""
+        c = Client()
+        login = c.post("/login/",{"id":self.user1,"password":"James123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+
+        #Check error responses
+        self.assertEqual(c.post(f"/deletemessage/").json()["status"],
+        'Missing Parameter: messageid.')
+
+        self.assertEqual(c.post(f"/deletemessage/", {"messageid":10}).json()["status"],
+        'Id "10" does not match any message sent by user "James".')
+
+        #Check normal response
+        Message.objects.create(content="content",
+                                sender=self.user1,
+                                receiver=self.user2)
+        self.assertEqual(c.post(f"/deletemessage/", {"messageid":1}).json()["status"],
+        'Message Deleted Successfully.')
+        self.assertFalse(Message.objects.all())
+        
