@@ -103,7 +103,7 @@ class getopenchats(APIView): #Gets all the open chats of an user
         chats_serialized = []
         for chat in chats:
             chats_serialized.append(ChatSerializer(chat,context={'loguser':loguser}).data)
-        response = [chats_serialized.pop(0)]
+        response = []
         for chat in chats_serialized:
             i=0
             last_message = chat['last_message']
