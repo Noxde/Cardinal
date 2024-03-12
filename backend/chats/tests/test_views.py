@@ -99,3 +99,33 @@ class ViewsTestCase(TestCase):
         response =  c.post(f"/createchat/Thomas/")
         self.assertEqual(response.json()["id"],3)
         self.assertEqual(response.json()["chat_user"]["id"],2)
+
+    def test_getopenchats(self):
+        """Getopenchats view is OK."""
+        c = Client()
+        login = c.post("/login/",{"id":self.user1,"password":"James123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+
+        #Check error responses
+        self.assertEqual(c.get(f"/getopenchats/").json()["status"],
+        'User "James" does not have any open chat.')
+
+        Chat.objects.create(user_one=self.user1,user_two=self.user2)
+        self.assertFalse(c.get(f"/getopenchats/").json())
+       
+       #Check normal response
+        chat = Chat.objects.create(user_one=self.user1,user_two=self.user2)
+        Message.objects.create(content="Do not delete chat",
+                               sender=self.user1,
+                               receiver=self.user2)
+        response = c.get(f"/getopenchats/").json()
+        self.assertEqual(response[0]["id"],2)
+        self.assertEqual(response[0]["chat_user"]["id"],2)
+        self.assertEqual(response[0]["last_message"]["content"],
+                         "Do not delete chat")
+        self.assertEqual(len(response),1)
+
+        chat.show_to_user_one = False
+        chat.save()
+        self.assertEqual(c.get(f"/getopenchats/").json()["status"],
+        'User "James" does not have any open chat.')
