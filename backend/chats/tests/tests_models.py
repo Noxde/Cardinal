@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from .models import Chat, Message
+from ..models import Chat, Message
 from datetime import datetime,timezone,timedelta
 
 class ChatTestCase(TestCase):
