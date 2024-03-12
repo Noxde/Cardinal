@@ -150,4 +150,40 @@ class ViewsTestCase(TestCase):
         self.assertEqual(c.post(f"/deletemessage/", {"messageid":1}).json()["status"],
         'Message Deleted Successfully.')
         self.assertFalse(Message.objects.all())
-        
+
+    def test_deletechat(self):
+        """Deletechat view is OK."""
+        c = Client()
+        login = c.post("/login/",{"id":self.user1,"password":"James123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+
+        #Create a chat and messages
+        u1, u2 = self.user1, self.user2
+        Chat.objects.create(user_one=u1,user_two=u2)
+        Message.objects.create(content="1",sender=u1,receiver=u2)
+        Message.objects.create(content="2",sender=u2,receiver=u1)
+        Message.objects.create(content="3",sender=u1,receiver=u2)
+        Message.objects.create(content="4",sender=u2,receiver=u1)
+
+        #Check error responses
+        self.assertEqual(c.post(f"/deletechat/").json()["status"],
+        'Missing Parameter: "chatid".')
+
+        self.assertEqual(c.post(f"/deletechat/", {"chatid":10}).json()["status"],
+        'User "James" does not have any chat with id "10".')
+
+        #Check normal response
+        self.assertEqual(c.post(f"/deletechat/", {"chatid":1}).json()["status"],
+        'Chat Deleted Successfully.')
+        self.assertFalse(Chat.objects.get(id=1).show_to_user_one)
+        self.assertFalse(Message.objects.get(id=1).show_to_sender)
+        self.assertFalse(Message.objects.get(id=2).show_to_receiver)
+        self.assertFalse(Message.objects.get(id=3).show_to_sender)
+        self.assertFalse(Message.objects.get(id=4).show_to_receiver)
+
+        login = c.post("/login/",{"id":self.user2,"password":"Thomas123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+        self.assertEqual(c.post(f"/deletechat/", {"chatid":1}).json()["status"],
+        'Chat Deleted Successfully.')
+        self.assertFalse(Chat.objects.all())
+        self.assertFalse(Message.objects.all())
