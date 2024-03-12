@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from ..models import Message
+from ..models import Chat, Message
 
 class ViewsTestCase(TestCase):
     def setUp(self):
@@ -70,3 +70,32 @@ class ViewsTestCase(TestCase):
         
         self.user1.delete()
         self.assertFalse(Message.objects.all())
+
+    def test_createchat(self):
+        """Createchat view is OK."""
+        c = Client()
+        login = c.post("/login/",{"id":self.user1,"password":"James123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+
+        #Check error responses
+        self.assertEqual(c.post(f"/createchat/test/").json()["status"],
+        'Username "test" does not match any user.')
+
+        self.assertEqual(c.post(f"/createchat/James/").json()["status"],
+        'Chat creation avoided: "username_two" cannot be the same as the authenticated user.')
+
+        Chat.objects.create(user_one=self.user1, user_two=self.user2)
+
+        self.assertEqual(c.post(f"/createchat/Thomas/").json()["status"],
+        'Chat already exists.')
+
+        Chat.objects.create(user_one=self.user1, user_two=self.user2)
+
+        self.assertEqual(c.post(f"/createchat/Thomas/").json()["status"],
+        'MultipleObjectsReturned, Chat creation avoided.')
+
+        #Check normal response
+        Chat.objects.all().delete()
+        response =  c.post(f"/createchat/Thomas/")
+        self.assertEqual(response.json()["id"],3)
+        self.assertEqual(response.json()["chat_user"]["id"],2)
