@@ -44,3 +44,22 @@ class ViewsTestCase(TestCase):
         # Test error response
         response = c.post("/createpost/")
         self.assertEqual(response.json()["status"],"Missing content.")
+
+    def test_delete(self):
+        """Delete view is OK."""
+        c = Client()
+        login = c.post("/login/",{"id":self.user1,"password":"Charles123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+
+        # Test error responses
+        response = c.post("/delete/")
+        self.assertEqual(response.json()['status'],'Wrong or missing id.')
+
+        response = c.post("/delete/",{'id':999})
+        self.assertEqual(response.json()['status'],'Failed to Delete Post.')
+
+        # Test correct response
+        self.assertTrue(Post.objects.filter(id=self.post1.id))
+        response = c.post("/delete/",{'id':self.post1.id})
+        self.assertEqual(response.json()['status'],'Post Deleted Successfully.')
+        self.assertFalse(Post.objects.filter(id=self.post1.id))
