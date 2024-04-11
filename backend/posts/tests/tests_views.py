@@ -108,3 +108,49 @@ class ViewsTestCase(TestCase):
         response = c.post(f"/likes/comment/remove/{self.comment1.id}/")
         self.assertEqual(response.json()['status'],'Operation Successful.')
         self.assertFalse(self.comment1.likes.all())
+    
+    def test_getpost(self):
+        """Getpost view is OK."""
+        c = Client()
+        login = c.post("/login/",{"id":self.user1,"password":"Charles123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+
+        
+        # Test error responses
+        response = c.get("/getpost/test/test/test/")
+        self.assertEqual(response.json()['status'],'Wrong context parameter.')
+
+        response = c.get("/getpost/profile/test/True/")
+        self.assertEqual(response.json()['status'],'Username "test" did not match any user.')
+
+
+        # Create posts for testing
+        for i in range(11):
+            Post.objects.create(content=f'A{i+1}',user=self.user1)
+
+        user2 = get_user_model().objects.create(username="James")
+        self.user1.follows.add(user2)
+        for i in range(11):
+            Post.objects.create(content=f'B{i+1}',user=user2)
+
+        # Profile
+        response = c.get(f"/getpost/profile/{self.user1.username}/True/")
+        for i, v in enumerate(response.json().values()):
+            self.assertEqual(v['content'],f'A{11-i}')
+        response = c.get(f"/getpost/profile/{self.user1.username}/False/")
+        self.assertEqual(response.json()['0']['content'],'A1')
+        response = c.get(f"/getpost/profile/{self.user1.username}/False/")
+        self.assertEqual(response.json()['status'],'Failed to get posts with id less than 1 from user "Charles".')
+        response = c.get(f"/getpost/profile/{self.user1.username}/True/")
+        self.assertEqual(len(response.json().keys()),10) 
+
+        # Feed
+        response = c.get(f"/getpost/feed/test/True/")
+        for i, v in enumerate(response.json()):
+            self.assertEqual(v['content'],f'B{11-i}')
+        response = c.get(f"/getpost/feed/test/False/")
+        self.assertEqual(response.json()[0]['content'],'B1')
+        response = c.get(f"/getpost/feed/test/False/")
+        self.assertEqual(response.json()['status'],'Failed to get posts with id less than 13 for user "Charles".')
+        response = c.get(f"/getpost/feed/test/True/")
+        self.assertEqual(len(response.json()),10) 
