@@ -13,7 +13,7 @@ class ViewsTestCase(TestCase):
 
         self.post1 =  Post.objects.create(content="This is a post",user=self.user1)
         
-        self.comment1 = Comment.objects.create(content="This is a coment",user=self.user1,post=self.post1)
+        self.comment1 = Comment.objects.create(content="This is a comment",user=self.user1,post=self.post1)
 
     def test_createpost(self):
         """Createpost view is OK."""
@@ -153,4 +153,30 @@ class ViewsTestCase(TestCase):
         response = c.get(f"/getpost/feed/test/False/")
         self.assertEqual(response.json()['status'],'Failed to get posts with id less than 13 for user "Charles".')
         response = c.get(f"/getpost/feed/test/True/")
+        self.assertEqual(len(response.json()),10) 
+
+    def test_getcomment(self):
+        """Getcomment view is OK."""
+        c = Client()
+        login = c.post("/login/",{"id":self.user1,"password":"Charles123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+
+        # Test error response
+        response = c.get("/getcomment/999/test/")
+        self.assertEqual(response.json()['status'],'Id "999" does not match any post.')
+
+        # Create comments for testing
+        for i in range(10):
+            Comment.objects.create(content=f'C{i+1}',post=self.post1,user=self.user1)
+        
+        # Test success reponses
+        response = c.get(f"/getcomment/{self.post1.id}/True/")
+        for i, v in enumerate(response.json()):
+            self.assertEqual(v['content'],f'C{10-i}')
+        response = c.get(f"/getcomment/{self.post1.id}/False/")        
+        self.assertEqual(response.json()[0]['content'],'This is a comment')
+        response = c.get(f"/getcomment/{self.post1.id}/False/")
+        self.assertEqual(response.json()['status'],f'There are no more available comments for post {self.post1.id}.')
+        response = c.get(f"/getcomment/{self.post1.id}/True/")
+        print(response.json())
         self.assertEqual(len(response.json()),10) 
