@@ -215,3 +215,22 @@ class ViewsTestCase(TestCase):
         self.assertEqual(len(files),2)
         self.assertTrue(cmp(f"{MEDIA_ROOT}/{files[0].file.name}",f"{MEDIA_ROOT}/tests/test_image_1.jpg",shallow=False))
         self.assertTrue(cmp(f"{MEDIA_ROOT}/{files[1].file.name}",f"{MEDIA_ROOT}/tests/test_image_2.jpg",shallow=False))
+
+    def test_deletecomment(self):
+        """Deletecomment view is OK."""
+        c = Client()
+        login = c.post("/login/",{"id":self.user1,"password":"Charles123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+
+        # Test error responses
+        response = c.post("/deletecomment/")
+        self.assertEqual(response.json()['status'],'Missing Parameter: Comment ID.')
+
+        response = c.post("/deletecomment/",{"commentid":999})
+        self.assertEqual(response.json()['status'],f'Id "999" does not match any comment from user "{self.user1.username}".')
+
+        # Test success reponses
+        self.assertEqual(Comment.objects.first(),self.comment1)
+        response = c.post("/deletecomment/",{"commentid":self.comment1.id})
+        self.assertEqual(response.json()['status'],f'Comment Deleted Successfully.')
+        self.assertFalse(Comment.objects.all())
