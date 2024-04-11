@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from ..models import Post, PostFiles, Comment
+from ..models import Post, PostFiles, Comment, CommentFiles
 from backend.settings import MEDIA_ROOT
 from filecmp import cmp
 
@@ -178,5 +178,40 @@ class ViewsTestCase(TestCase):
         response = c.get(f"/getcomment/{self.post1.id}/False/")
         self.assertEqual(response.json()['status'],f'There are no more available comments for post {self.post1.id}.')
         response = c.get(f"/getcomment/{self.post1.id}/True/")
-        print(response.json())
         self.assertEqual(len(response.json()),10) 
+
+    def test_createcomment(self):
+        """Createcomment view is OK."""
+        c = Client()
+        login = c.post("/login/",{"id":self.user1,"password":"Charles123"})
+        c = Client(HTTP_AUTHORIZATION=f'Bearer {login.json()["access"]}')
+
+        # Test error responses
+        response = c.post("/createcomment/")
+        self.assertEqual(response.json()['status'],'Id does not match any post.')
+
+        response = c.post("/createcomment/",{'postid':self.post1.id})
+        self.assertEqual(response.json()['status'],'Content Parameter Missing.')
+
+        # Test success reponses
+        # Create comment with 2 images
+        file1 = open(f"{MEDIA_ROOT}/tests/test_image_1.jpg", "rb")
+        file2 = open(f"{MEDIA_ROOT}/tests/test_image_2.jpg", "rb")
+        response = c.post("/createcomment/",
+                        {"postid":self.post1.id,
+                        "content":"I like apples.",
+                        '0':file1,
+                        '1':file2})
+        file1.close()
+        file2.close()
+        self.assertEqual(response.json()["status"],"Comment Created Successfully.")
+
+        # Get the created comment from the database
+        comment = Comment.objects.get(content="I like apples.")
+        self.assertEqual(comment.user,self.user1)
+
+        # Get the files of the comment
+        files = CommentFiles.objects.filter(comment=comment)
+        self.assertEqual(len(files),2)
+        self.assertTrue(cmp(f"{MEDIA_ROOT}/{files[0].file.name}",f"{MEDIA_ROOT}/tests/test_image_1.jpg",shallow=False))
+        self.assertTrue(cmp(f"{MEDIA_ROOT}/{files[1].file.name}",f"{MEDIA_ROOT}/tests/test_image_2.jpg",shallow=False))
