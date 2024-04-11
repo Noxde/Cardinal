@@ -183,7 +183,7 @@ class getcomment(APIView): #Returns comments from a post
                 post = Post.objects.get(id = id)
             except Post.DoesNotExist:
                 return JsonResponse({'status':f'Id "{id}" does not match any post.'},status=404)
-            if last_comment >= len(Comment.objects.filter(post=id)):
+            if last_comment <= Comment.objects.first().id:
                 return JsonResponse({'status':f'There are no more available comments for post {id}.'},status=404)
 
         response = []
