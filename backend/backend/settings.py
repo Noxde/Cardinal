@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'userauth',
     'posts',
     'chats',
+    'admin_app',
     'daphne',
     'rest_framework',
     'django.contrib.admin',
