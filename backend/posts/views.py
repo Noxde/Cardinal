@@ -5,9 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from backend.settings import ELEMENTS_PER_SCROLL, FILES_PER_POST, FILES_PER_COMMENT
-
-
-
+from userauth.tokens import createToken
 
 class createpost(APIView): #Creates a new post 
     permission_classes = [IsAuthenticated]
@@ -29,6 +27,7 @@ class createpost(APIView): #Creates a new post
                 post = Post.objects.create(user=user,content=content)
                 if files:
                     for file in files:
+                        file.name = f'{createToken(15)}.{file.name.split(".")[1]}'  #Changes its name to an alphanumeric token
                         PostFiles.objects.create(post=post,file=file)
 
                 return JsonResponse({'status':'Post Created Successfully.'}, status=201)
@@ -221,6 +220,7 @@ class createcomment(APIView): #Creates a new comment on a post
                 comment = Comment.objects.create(user=user,content=content,post=post)
                 if files:
                     for file in files:
+                        file.name = f'{createToken(15)}.{file.name.split(".")[1]}'  #Changes its name to an alphanumeric token
                         CommentFiles.objects.create(comment=comment,file=file)
 
                 return JsonResponse({'status':'Comment Created Successfully.'}, status=201)
